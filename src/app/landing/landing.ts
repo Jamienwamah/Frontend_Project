@@ -36,6 +36,9 @@ export class LandingComponent {
 
   // Login state
   isLoggedIn = false;
+  isCheckingAuth = true;
+  userName = '';
+  showUserMenu = false;
 
 
   // ============================================================
@@ -134,49 +137,168 @@ export class LandingComponent {
   // ============================================================
   // AUTHENTICATION
   // ============================================================
-  
-checkLoginStatus(): void {
-  fetch('http://localhost:8000/auth/user/', {
-    method: 'GET',
-    credentials: 'include',
-  })
-    .then(response => {
-      this.isLoggedIn = response.ok;
+
+  checkLoginStatus(): void {
+
+    const cachedUserName =
+      sessionStorage.getItem('userName');
+
+    if (cachedUserName) {
+
+      this.userName = cachedUserName;
+      this.isLoggedIn = true;
+      this.isCheckingAuth = false;
+
+    }
+
+    fetch('http://localhost:8000/auth/user/', {
+      method: 'GET',
+      credentials: 'include',
     })
-    .catch(error => {
-      console.error('Login status check failed:', error);
-      this.isLoggedIn = false;
-    });
-}
 
-navigateToLogin(): void {
-  console.log('Starting Microsoft authentication');
+      .then(response => {
 
-  window.location.href = 'http://localhost:8000/auth/login/';
-}
+        if (!response.ok) {
 
-logout(): void {
-  fetch('http://localhost:8000/auth/logout/', {
-    method: 'GET',
-    credentials: 'include',
-  })
-    .then(response => {
-      if (response.ok) {
+          sessionStorage.removeItem('userName');
+
+          this.isLoggedIn = false;
+          this.userName = '';
+          this.isCheckingAuth = false;
+
+          window.location.href =
+            'http://localhost:8000/auth/login/';
+
+          return null;
+        }
+
+        return response.json();
+
+      })
+
+      .then(data => {
+
+        if (!data) {
+          return;
+        }
+
+        if (
+          data.authenticated === true &&
+          data.user
+        ) {
+
+          this.userName = data.user.name;
+          this.isLoggedIn = true;
+          this.isCheckingAuth = false;
+
+          sessionStorage.setItem(
+            'userName',
+            data.user.name
+          );
+
+        } else {
+
+          sessionStorage.removeItem('userName');
+
+          this.isLoggedIn = false;
+          this.userName = '';
+          this.isCheckingAuth = false;
+
+          window.location.href =
+            'http://localhost:8000/auth/login/';
+
+        }
+
+      })
+
+      .catch(error => {
+
+        console.error(
+          'Login status check failed:',
+          error
+        );
+
+        sessionStorage.removeItem('userName');
+
         this.isLoggedIn = false;
-      }
-    })
-    .catch(error => {
-      console.error('Logout failed:', error);
-    });
-}
+        this.userName = '';
+        this.isCheckingAuth = false;
 
-handleAuthentication(): void {
-  if (this.isLoggedIn) {
-    this.logout();
-  } else {
-    this.navigateToLogin();
+        window.location.href =
+          'http://localhost:8000/auth/login/';
+
+      });
+
   }
-}
+
+
+  navigateToLogin(): void {
+
+    window.location.href =
+      'http://localhost:8000/auth/login/';
+
+  }
+
+
+  toggleUserMenu(event: MouseEvent): void {
+
+    event.stopPropagation();
+
+    this.showUserMenu =
+      !this.showUserMenu;
+
+  }
+
+
+  @HostListener('document:click')
+  closeUserMenu(): void {
+
+    this.showUserMenu = false;
+
+  }
+
+
+  logout(): void {
+
+    fetch('http://localhost:8000/auth/logout/', {
+
+      method: 'GET',
+
+      credentials: 'include',
+
+    })
+
+      .finally(() => {
+
+        sessionStorage.removeItem('userName');
+
+        this.isLoggedIn = false;
+        this.userName = '';
+        this.showUserMenu = false;
+
+        window.location.href =
+          'http://localhost:8000/auth/login/';
+
+      });
+
+  }
+
+
+  handleAuthentication(): void {
+
+    if (this.isLoggedIn) {
+
+      this.logout();
+
+    } else {
+
+      this.navigateToLogin();
+
+    }
+
+  }
+
+
   // ============================================================
   // DROPDOWN
   // ============================================================
@@ -192,6 +314,7 @@ handleAuthentication(): void {
       this.activeDropdownId === formId
         ? null
         : formId;
+
   }
 
 
@@ -244,4 +367,3 @@ handleAuthentication(): void {
   }
 
 }
-

@@ -7,6 +7,7 @@ import {
   Validators
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 export interface OGCMInfrastructurePayload {
   currentDate: Date;
@@ -61,7 +62,7 @@ export interface OGCMInfrastructurePayload {
             class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7" />
             </svg>
             Back to Portal Landing
           </a>
@@ -322,6 +323,7 @@ export interface OGCMInfrastructurePayload {
 export class OgcmInfrastructureReceiptFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   receiptForm!: FormGroup;
   currentDate: Date = new Date();
@@ -384,9 +386,31 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
         currentDate: this.currentDate,
         ...this.receiptForm.value
       };
+
       console.log('Infrastructure Receipt Payload:', payload);
-      alert('Infrastructure asset registered and logged successfully!');
-      this.router.navigate(['/']);
+
+      this.http.post(
+        'http://127.0.0.1:8000/api/v1/ogcm/infrastructure/',
+        payload
+      ).subscribe({
+        next: (response) => {
+          console.log('Infrastructure Receipt Created:', response);
+
+          alert('Infrastructure asset registered and logged successfully!');
+
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          console.error('Infrastructure Receipt Error:', error);
+
+          alert(
+            error?.error?.detail ||
+            error?.error?.message ||
+            'Failed to register infrastructure asset. Please try again.'
+          );
+        }
+      });
+
     } else {
       this.receiptForm.markAllAsTouched();
       alert('Please fill out all required fields.');

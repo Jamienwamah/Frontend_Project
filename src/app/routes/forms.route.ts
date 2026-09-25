@@ -8,33 +8,42 @@ import { OstTroubleshoot } from '../pages/forms/OST-Systems/troubleshooting';
 import { OgcmInfrastructureReceiptFormComponent } from '../pages/forms/OGCM/Infrastructure';
 import { OGFSInfrastructure } from '../pages/forms/OGFS/Infrastructure';
 import { ItInfrastructureReceiptFormComponent } from '../pages/forms/OST-Systems/infrastructure';
+import {LaptopAcquisitionConsentComponent } from '../pages/forms/OGFS/Issue';
+import { OGCMLaptopAcquisitionConsentComponent } from '../pages/forms/OGCM/Issue';
+import { OSTLaptopAcquisitionConsentComponent } from '../pages/forms/OST-Systems/Issue';
 
 export const FORM_ROUTES: Routes = [
   // OGCM
   { path: 'OGCM/replacement', component: OGCMReplacement },
   { path: 'OGCM/troubleshooting', component: OGCMTroubleshoot },
   { path: 'OGCM/infrastructure', component: OgcmInfrastructureReceiptFormComponent },
+  {path: 'OGCM/issue', component: OGCMLaptopAcquisitionConsentComponent},
 
   // OGFS
   { path: 'OGFS/replacement', component: OGFSReplacement },
   { path: 'OGFS/troubleshooting', component: OGFSTroubleshooting },
   { path: 'OGFS/infrastructure', component: OGFSInfrastructure },
+  {path: 'OGFS/issue', component: LaptopAcquisitionConsentComponent},
 
   // OST
   { path: 'OST-Systems/replacement', component: OstReplacement },
   { path: 'OST-Systems/troubleshooting', component: OstTroubleshoot },
   { path: 'OST-Systems/infrastructure', component: ItInfrastructureReceiptFormComponent },
+  {path: 'OST-Systems/issue', component: OSTLaptopAcquisitionConsentComponent},
 
   // Lowercase aliases for manually typed URLs.
   { path: 'ogcm/replacement', redirectTo: 'OGCM/replacement', pathMatch: 'full' },
   { path: 'ogcm/troubleshooting', redirectTo: 'OGCM/troubleshooting', pathMatch: 'full' },
   { path: 'ogcm/infrastructure', redirectTo: 'OGCM/infrastructure', pathMatch: 'full' },
+  {path: 'ogcm/issue', redirectTo: 'OGCM/issue', pathMatch: 'full'},
   { path: 'ogfs/replacement', redirectTo: 'OGFS/replacement', pathMatch: 'full' },
   { path: 'ogfs/troubleshooting', redirectTo: 'OGFS/troubleshooting', pathMatch: 'full' },
   { path: 'ogfs/infrastructure', redirectTo: 'OGFS/infrastructure', pathMatch: 'full' },
+  {path: 'ogfs/issue', redirectTo: 'OGFS/issue', pathMatch: 'full'},
   { path: 'ost-systems/replacement', redirectTo: 'OST-Systems/replacement', pathMatch: 'full' },
   { path: 'ost-systems/troubleshooting', redirectTo: 'OST-Systems/troubleshooting', pathMatch: 'full' },
   { path: 'ost-systems/infrastructure', redirectTo: 'OST-Systems/infrastructure', pathMatch: 'full' },
+  {path: 'ost-systems/issue', redirectTo: 'OST-Systems/issue', pathMatch: 'full'},
 ];
 
 // import { Routes } from '@angular/router';

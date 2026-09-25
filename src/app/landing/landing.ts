@@ -15,7 +15,7 @@ interface EntityOption {
 
 
 interface FormCard {
-  id: 'replacement' | 'troubleshooting' | 'infrastructure';
+  id: 'issue' | 'replacement' | 'troubleshooting' | 'infrastructure';
   title: string;
   description: string;
   category: string;
@@ -70,6 +70,21 @@ export class LandingComponent {
   // ============================================================
 
   availableForms: FormCard[] = [
+    {
+      id: 'issue',
+
+      title: 'Assign A New Device',
+
+      description:
+        'This takes records of all new devices that has has been issued, including Laptops, Desktops, Monitors',
+
+      category: 'Device Assignment',
+
+      iconBg: 'bg-blue-50',
+
+      iconPath:
+        'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+    },
 
     {
       id: 'troubleshooting',
@@ -103,7 +118,6 @@ export class LandingComponent {
       iconPath:
         'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
     },
-
 
     {
       id: 'infrastructure',
@@ -147,7 +161,6 @@ export class LandingComponent {
 
       this.userName = cachedUserName;
       this.isLoggedIn = true;
-      this.isCheckingAuth = false;
 
     }
 
@@ -160,14 +173,9 @@ export class LandingComponent {
 
         if (!response.ok) {
 
-          sessionStorage.removeItem('userName');
+          this.clearLocalSession();
 
-          this.isLoggedIn = false;
-          this.userName = '';
-          this.isCheckingAuth = false;
-
-          window.location.href =
-            'http://localhost:8000/auth/login/';
+          this.redirectToLogin();
 
           return null;
         }
@@ -198,14 +206,9 @@ export class LandingComponent {
 
         } else {
 
-          sessionStorage.removeItem('userName');
+          this.clearLocalSession();
 
-          this.isLoggedIn = false;
-          this.userName = '';
-          this.isCheckingAuth = false;
-
-          window.location.href =
-            'http://localhost:8000/auth/login/';
+          this.redirectToLogin();
 
         }
 
@@ -218,16 +221,88 @@ export class LandingComponent {
           error
         );
 
-        sessionStorage.removeItem('userName');
+        this.clearLocalSession();
 
-        this.isLoggedIn = false;
-        this.userName = '';
-        this.isCheckingAuth = false;
-
-        window.location.href =
-          'http://localhost:8000/auth/login/';
+        this.redirectToLogin();
 
       });
+
+  }
+
+
+  // ============================================================
+  // TAB / WINDOW SESSION CONTROL
+  // ============================================================
+
+  @HostListener('document:visibilitychange')
+  handleVisibilityChange(): void {
+
+    if (document.visibilityState === 'hidden') {
+
+      this.closeApplicationSession();
+
+    }
+
+  }
+
+
+  @HostListener('window:pagehide')
+  handlePageHide(): void {
+
+    this.closeApplicationSession();
+
+  }
+
+
+  private closeApplicationSession(): void {
+
+    if (!this.isLoggedIn) {
+
+      this.clearLocalSession();
+
+      return;
+
+    }
+
+    this.isLoggedIn = false;
+    this.userName = '';
+    this.showUserMenu = false;
+    this.isCheckingAuth = false;
+
+    sessionStorage.removeItem('userName');
+
+    fetch('http://localhost:8000/auth/logout/', {
+      method: 'GET',
+      credentials: 'include',
+      keepalive: true
+    }).catch(error => {
+
+      console.error(
+        'Automatic session logout failed:',
+        error
+      );
+
+    });
+
+  }
+
+
+  private clearLocalSession(): void {
+
+    sessionStorage.removeItem('userName');
+
+    this.isLoggedIn = false;
+    this.userName = '';
+    this.showUserMenu = false;
+    this.isCheckingAuth = false;
+
+  }
+
+
+  private redirectToLogin(): void {
+
+    window.location.href =
+      'http://localhost:8000/auth/login/';
 
   }
 
@@ -270,11 +345,7 @@ export class LandingComponent {
 
       .finally(() => {
 
-        sessionStorage.removeItem('userName');
-
-        this.isLoggedIn = false;
-        this.userName = '';
-        this.showUserMenu = false;
+        this.clearLocalSession();
 
         window.location.href =
           'http://localhost:8000/auth/login/';

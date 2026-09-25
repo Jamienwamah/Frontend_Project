@@ -7,6 +7,8 @@ import {
   Validators
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { EntraService } from '../../../core/services/entra.service';
 
 export interface DeviceReplacementPayload {
   currentDate: Date;
@@ -320,6 +322,8 @@ export interface DeviceReplacementPayload {
 export class OGCMReplacement implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private http = inject(HttpClient);
+  private entraService = inject(EntraService);
 
   replacementForm!: FormGroup;
   currentDate: Date = new Date();
@@ -327,11 +331,24 @@ export class OGCMReplacement implements OnInit {
   ngOnInit(): void {
     this.replacementForm = this.fb.group({
       employee: this.fb.group({
-        name: ['', Validators.required],
-        department: ['', Validators.required],
-        jobTitle: ['', Validators.required],
-        employeeId: ['', Validators.required]
+        name: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+        department: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+        jobTitle: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+        employeeId: [
+          { value: '', disabled: true },
+          Validators.required
+        ]
       }),
+
       currentDevice: this.fb.group({
         assetTag: [''],
         deviceType: ['', Validators.required],
@@ -339,19 +356,53 @@ export class OGCMReplacement implements OnInit {
         serialNumber: ['', Validators.required],
         reasonForReplacement: ['', Validators.required]
       }),
+
       replacementDetails: this.fb.group({
         requestedDeviceType: ['', Validators.required],
         urgencyLevel: ['', Validators.required],
         justification: ['', Validators.required],
         requiredDate: ['', Validators.required]
       }),
+
       authorization: this.fb.group({
         agreed: [false, Validators.requiredTrue]
       }),
+
       signatures: this.fb.group({
         employee: ['', Validators.required],
-        employeeDate: [new Date().toISOString().substring(0, 10), Validators.required]
+        employeeDate: [
+          new Date().toISOString().substring(0, 10),
+          Validators.required
+        ]
       })
+    });
+
+    this.loadEmployeeInformation();
+  }
+
+  private loadEmployeeInformation(): void {
+    this.entraService.getMyProfile().subscribe({
+      next: (response) => {
+        this.replacementForm
+          .get('employee')
+          ?.patchValue({
+            name: response.profile.name,
+            employeeId: response.profile.employeeId,
+            department: response.profile.department,
+            jobTitle: response.profile.jobTitle
+          });
+      },
+
+      error: (error) => {
+        console.error(
+          'Unable to load employee information:',
+          error
+        );
+
+        alert(
+          'Unable to retrieve your Microsoft employee information.'
+        );
+      }
     });
   }
 
@@ -359,19 +410,61 @@ export class OGCMReplacement implements OnInit {
     if (this.replacementForm.valid) {
       const payload: DeviceReplacementPayload = {
         currentDate: this.currentDate,
-        ...this.replacementForm.value
+        ...this.replacementForm.getRawValue()
       };
-      console.log('Form Submission Payload:', payload);
-      alert('OGCM Replacement Form submitted successfully!');
-      this.router.navigate(['/']);
+
+      console.log(
+        'Form Submission Payload:',
+        payload
+      );
+
+      this.http.post(
+        'http://127.0.0.1:8000/api/v1/ogcm/replacement/',
+        payload,
+        {
+          withCredentials: true
+        }
+      ).subscribe({
+        next: (response: any) => {
+          alert(
+            response.message ||
+            'OGCM Replacement Form submitted successfully!'
+          );
+
+          this.router.navigate(['/']);
+        },
+
+        error: (error) => {
+          console.error(
+            'Device replacement submission failed:',
+            error
+          );
+
+          alert(
+            error?.error?.message ||
+            'Unable to submit the replacement request.'
+          );
+        }
+      });
     } else {
       this.replacementForm.markAllAsTouched();
-      alert('Please fill out all required fields.');
+
+      alert(
+        'Please fill out all required fields.'
+      );
     }
   }
 
-  public isFieldInvalid(groupName: string, fieldName: string): boolean {
-    const field = this.replacementForm.get(`${groupName}.${fieldName}`);
-    return field ? field.invalid && (field.dirty || field.touched) : false;
+  public isFieldInvalid(
+    groupName: string,
+    fieldName: string
+  ): boolean {
+    const field = this.replacementForm.get(
+      `${groupName}.${fieldName}`
+    );
+
+    return field
+      ? field.invalid && (field.dirty || field.touched)
+      : false;
   }
 }

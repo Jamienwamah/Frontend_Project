@@ -9,8 +9,19 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
+import { EntraService } from '../../../core/services/entra.service';
+
+
 export interface OGCMInfrastructurePayload {
   currentDate: Date;
+
+  employee: {
+    name: string;
+    department: string;
+    jobTitle: string;
+    employeeId: string;
+  };
+
   documentNo: string;
   dateReceived: string;
 
@@ -41,6 +52,7 @@ export interface OGCMInfrastructurePayload {
     notes?: string;
   };
 }
+
 
 @Component({
   selector: 'app-ogcm-infrastructure-receipt',
@@ -101,6 +113,71 @@ export interface OGCMInfrastructurePayload {
           <!-- FORM BODY -->
           <form [formGroup]="receiptForm" (ngSubmit)="onSubmit()" class="p-6 sm:p-8 space-y-10 text-slate-900">
 
+            <!-- EMPLOYEE INFORMATION -->
+            <section formGroupName="employee" class="space-y-5">
+              <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                  1
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-slate-800">Employee Information</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">Employee information retrieved from Microsoft Entra.</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="department"
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                    Job Title
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="jobTitle"
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                    Employee ID
+                  </label>
+                  <input
+                    type="text"
+                    formControlName="employeeId"
+                    placeholder="Enter Employee ID"
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
+                  />
+                </div>
+
+              </div>
+            </section>
+
             <!-- DOCUMENT METADATA STRIP -->
             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
@@ -120,11 +197,11 @@ export interface OGCMInfrastructurePayload {
               </div>
             </div>
 
-            <!-- SECTION 1: PROCUREMENT INFORMATION -->
+            <!-- SECTION 2: PROCUREMENT INFORMATION -->
             <section formGroupName="procurement" class="space-y-5">
               <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  1
+                  2
                 </div>
                 <div>
                   <h2 class="text-lg font-bold text-slate-800">Procurement Information</h2>
@@ -187,11 +264,11 @@ export interface OGCMInfrastructurePayload {
               </div>
             </section>
 
-            <!-- SECTION 2: INFRASTRUCTURE & ASSET DETAILS -->
+            <!-- SECTION 3: INFRASTRUCTURE & ASSET DETAILS -->
             <section formGroupName="infrastructure" class="space-y-5">
               <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  2
+                  3
                 </div>
                 <div>
                   <h2 class="text-lg font-bold text-slate-800">Infrastructure & Asset Details</h2>
@@ -245,11 +322,11 @@ export interface OGCMInfrastructurePayload {
               </div>
             </section>
 
-            <!-- SECTION 3: INSPECTION & QUALITY CHECK -->
+            <!-- SECTION 4: INSPECTION & QUALITY CHECK -->
             <section formGroupName="inspection" class="space-y-5">
               <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  3
+                  4
                 </div>
                 <div>
                   <h2 class="text-lg font-bold text-slate-800">Inspection & Quality Check</h2>
@@ -324,6 +401,7 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private entraService = inject(EntraService);
 
   receiptForm!: FormGroup;
   currentDate: Date = new Date();
@@ -348,6 +426,34 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
     const todayStr = new Date().toISOString().substring(0, 10);
 
     this.receiptForm = this.fb.group({
+
+      /*
+       * Employee information
+       *
+       * Name, department and job title
+       * come from Microsoft Entra.
+       *
+       * Employee ID is entered manually.
+       */
+      employee: this.fb.group({
+        name: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+
+        department: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+
+        jobTitle: [
+          { value: '', disabled: true },
+          Validators.required
+        ],
+
+        employeeId: ['']
+      }),
+
       documentNo: ['', Validators.required],
       dateReceived: [todayStr, Validators.required],
 
@@ -378,30 +484,73 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
         notes: ['']
       })
     });
+
+    this.loadEmployeeInformation();
+  }
+
+  private loadEmployeeInformation(): void {
+    this.entraService.getMyProfile().subscribe({
+      next: (response) => {
+        this.receiptForm
+          .get('employee')
+          ?.patchValue({
+            name: response.profile.name,
+            department: response.profile.department,
+            jobTitle: response.profile.jobTitle
+          });
+      },
+
+      error: (error) => {
+        console.error(
+          'Unable to load employee information:',
+          error
+        );
+
+        alert(
+          'Unable to retrieve your Microsoft employee information.'
+        );
+      }
+    });
   }
 
   public onSubmit(): void {
     if (this.receiptForm.valid) {
+
       const payload: OGCMInfrastructurePayload = {
         currentDate: this.currentDate,
-        ...this.receiptForm.value
+        ...this.receiptForm.getRawValue()
       };
 
-      console.log('Infrastructure Receipt Payload:', payload);
+      console.log(
+        'Infrastructure Receipt Payload:',
+        payload
+      );
 
       this.http.post(
-        'http://127.0.0.1:8000/api/v1/ogcm/infrastructure/',
-        payload
+        'http://localhost:8000/api/v1/ogcm/infrastructure/',
+        payload,
+        {
+          withCredentials: true
+        }
       ).subscribe({
         next: (response) => {
-          console.log('Infrastructure Receipt Created:', response);
+          console.log(
+            'Infrastructure Receipt Created:',
+            response
+          );
 
-          alert('Infrastructure asset registered and logged successfully!');
+          alert(
+            'Infrastructure asset registered and logged successfully!'
+          );
 
           this.router.navigate(['/']);
         },
+
         error: (error) => {
-          console.error('Infrastructure Receipt Error:', error);
+          console.error(
+            'Infrastructure Receipt Error:',
+            error
+          );
 
           alert(
             error?.error?.detail ||
@@ -413,17 +562,33 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
 
     } else {
       this.receiptForm.markAllAsTouched();
-      alert('Please fill out all required fields.');
+
+      alert(
+        'Please fill out all required fields.'
+      );
     }
   }
 
   public isFieldInvalid(fieldName: string): boolean {
     const field = this.receiptForm.get(fieldName);
-    return field ? field.invalid && (field.dirty || field.touched) : false;
+
+    return field
+      ? field.invalid &&
+        (field.dirty || field.touched)
+      : false;
   }
 
-  public isGroupFieldInvalid(groupName: string, fieldName: string): boolean {
-    const field = this.receiptForm.get(`${groupName}.${fieldName}`);
-    return field ? field.invalid && (field.dirty || field.touched) : false;
+  public isGroupFieldInvalid(
+    groupName: string,
+    fieldName: string
+  ): boolean {
+    const field = this.receiptForm.get(
+      `${groupName}.${fieldName}`
+    );
+
+    return field
+      ? field.invalid &&
+        (field.dirty || field.touched)
+      : false;
   }
 }

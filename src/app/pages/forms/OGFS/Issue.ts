@@ -605,7 +605,7 @@ export interface LaptopAcquisitionConsentPayload {
                 type="submit"
                 class="px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-xl shadow-md transition-all"
               >
-                Submit Form
+                Submit Laptop Request Form For OGFS
               </button>
 
             </div>

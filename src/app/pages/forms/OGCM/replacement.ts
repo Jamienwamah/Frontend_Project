@@ -758,7 +758,7 @@ export class OGCMReplacement implements OnInit, AfterViewInit {
       );
 
       this.http.post(
-        'http://127.0.0.1:8000/api/v1/ogcm/replacement/',
+        'http://localhost:8000/api/v1/ogcm/replacement/',
         payload,
         {
           withCredentials: true

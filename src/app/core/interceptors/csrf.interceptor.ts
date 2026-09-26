@@ -19,15 +19,17 @@ function getCookie(name: string): string | null {
 export const csrfInterceptor: HttpInterceptorFn = (req, next) => {
   const csrfToken = getCookie('csrftoken');
 
-  if (!csrfToken) {
-    return next(req);
-  }
-
-  const csrfRequest = req.clone({
-    setHeaders: {
-      'X-CSRFToken': csrfToken
-    }
+  let csrfRequest = req.clone({
+    withCredentials: true
   });
+
+  if (csrfToken) {
+    csrfRequest = csrfRequest.clone({
+      setHeaders: {
+        'X-CSRFToken': csrfToken
+      }
+    });
+  }
 
   return next(csrfRequest);
 };

@@ -1,6 +1,9 @@
 import {
+  AfterViewInit,
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject
 } from '@angular/core';
 
@@ -818,7 +821,7 @@ export interface DeviceTroubleshootingPayload {
                     for="consentAgreed"
                     class="text-xs text-slate-700 leading-relaxed"
                   >
-                    I authorize OGFS IT Support to perform diagnostic and
+                    I authorize OGCM IT Support to perform diagnostic and
                     remediation work on this equipment.
                   </label>
 
@@ -833,6 +836,7 @@ export interface DeviceTroubleshootingPayload {
                 class="grid grid-cols-1 sm:grid-cols-2 gap-5"
               >
 
+                <!-- DIGITAL SIGNATURE -->
                 <div>
 
                   <label
@@ -841,19 +845,56 @@ export interface DeviceTroubleshootingPayload {
                     Digital Signature *
                   </label>
 
-                  <input
-                    type="text"
-                    formControlName="employee"
-                    placeholder="Type full name to sign"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                  <div
+                    class="border border-slate-200 rounded-xl bg-white overflow-hidden"
                     [class.border-red-500]="
                       isFieldInvalid('signatures', 'employee')
                     "
-                  />
+                  >
+
+                    <canvas
+                      #employeeSignatureCanvas
+                      width="700"
+                      height="180"
+                      class="w-full h-40 touch-none cursor-crosshair block"
+                      (pointerdown)="startDrawing($event)"
+                      (pointermove)="draw($event)"
+                      (pointerup)="stopDrawing()"
+                      (pointerleave)="stopDrawing()"
+                      (pointercancel)="stopDrawing()"
+                    ></canvas>
+
+                    <div
+                      class="flex items-center justify-between px-3 py-2 border-t border-slate-100 bg-slate-50"
+                    >
+
+                      <span class="text-xs text-slate-400">
+                        Draw your signature above
+                      </span>
+
+                      <button
+                        type="button"
+                        (click)="clearSignature()"
+                        class="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                      >
+                        Clear Signature
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <span
+                    *ngIf="isFieldInvalid('signatures', 'employee')"
+                    class="text-xs text-red-500 mt-1 block"
+                  >
+                    Digital signature is required.
+                  </span>
 
                 </div>
 
 
+                <!-- SIGNATURE DATE -->
                 <div>
 
                   <label
@@ -865,11 +906,18 @@ export interface DeviceTroubleshootingPayload {
                   <input
                     type="date"
                     formControlName="employeeDate"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
                     [class.border-red-500]="
                       isFieldInvalid('signatures', 'employeeDate')
                     "
                   />
+
+                  <span
+                    *ngIf="isFieldInvalid('signatures', 'employeeDate')"
+                    class="text-xs text-red-500 mt-1 block"
+                  >
+                    Signature date is required.
+                  </span>
 
                 </div>
 
@@ -901,7 +949,7 @@ export interface DeviceTroubleshootingPayload {
     </div>
   `
 })
-export class OGCMTroubleshoot implements OnInit {
+export class OGCMTroubleshoot implements OnInit, AfterViewInit {
 
   private fb = inject(FormBuilder);
 
@@ -910,6 +958,13 @@ export class OGCMTroubleshoot implements OnInit {
   private http = inject(HttpClient);
 
   private entraService = inject(EntraService);
+
+
+  @ViewChild('employeeSignatureCanvas')
+  employeeSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+
+
+  private isDrawing = false;
 
 
   troubleshootingForm!: FormGroup;
@@ -1075,6 +1130,224 @@ export class OGCMTroubleshoot implements OnInit {
 
 
   /*
+   * INITIALIZE SIGNATURE CANVAS
+   */
+  ngAfterViewInit(): void {
+
+    this.setupCanvas(
+      this.employeeSignatureCanvas.nativeElement
+    );
+
+  }
+
+
+  /*
+   * SETUP SIGNATURE CANVAS
+   */
+  private setupCanvas(
+    canvas: HTMLCanvasElement
+  ): void {
+
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      return;
+    }
+
+    context.lineWidth = 2;
+
+    context.lineCap = 'round';
+
+    context.lineJoin = 'round';
+
+    context.strokeStyle = '#0f172a';
+
+  }
+
+
+  /*
+   * START DRAWING SIGNATURE
+   */
+  public startDrawing(
+    event: PointerEvent
+  ): void {
+
+    const canvas =
+      this.employeeSignatureCanvas.nativeElement;
+
+    const context =
+      canvas.getContext('2d');
+
+    if (!context) {
+      return;
+    }
+
+    this.isDrawing = true;
+
+    canvas.setPointerCapture(
+      event.pointerId
+    );
+
+    const position =
+      this.getCanvasPosition(
+        event,
+        canvas
+      );
+
+    context.beginPath();
+
+    context.moveTo(
+      position.x,
+      position.y
+    );
+
+  }
+
+
+  /*
+   * DRAW SIGNATURE
+   */
+  public draw(
+    event: PointerEvent
+  ): void {
+
+    if (!this.isDrawing) {
+      return;
+    }
+
+    const canvas =
+      this.employeeSignatureCanvas.nativeElement;
+
+    const context =
+      canvas.getContext('2d');
+
+    if (!context) {
+      return;
+    }
+
+    const position =
+      this.getCanvasPosition(
+        event,
+        canvas
+      );
+
+    context.lineTo(
+      position.x,
+      position.y
+    );
+
+    context.stroke();
+
+    this.updateSignatureValue();
+
+  }
+
+
+  /*
+   * STOP DRAWING
+   */
+  public stopDrawing(): void {
+
+    this.isDrawing = false;
+
+    this.updateSignatureValue();
+
+  }
+
+
+  /*
+   * GET CANVAS POSITION
+   */
+  private getCanvasPosition(
+    event: PointerEvent,
+    canvas: HTMLCanvasElement
+  ): {
+    x: number;
+    y: number;
+  } {
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+    return {
+
+      x:
+        (event.clientX - rect.left) *
+        (canvas.width / rect.width),
+
+      y:
+        (event.clientY - rect.top) *
+        (canvas.height / rect.height)
+
+    };
+
+  }
+
+
+  /*
+   * SAVE SIGNATURE TO FORM
+   */
+  private updateSignatureValue(): void {
+
+    const canvas =
+      this.employeeSignatureCanvas.nativeElement;
+
+    const signature =
+      canvas.toDataURL('image/png');
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.setValue(signature);
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.markAsTouched();
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.updateValueAndValidity();
+
+  }
+
+
+  /*
+   * CLEAR SIGNATURE
+   */
+  public clearSignature(): void {
+
+    const canvas =
+      this.employeeSignatureCanvas.nativeElement;
+
+    const context =
+      canvas.getContext('2d');
+
+    if (!context) {
+      return;
+    }
+
+    context.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.setValue('');
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.markAsTouched();
+
+    this.troubleshootingForm
+      .get('signatures.employee')
+      ?.updateValueAndValidity();
+
+  }
+
+
+  /*
    * GET EMPLOYEE INFORMATION FROM DJANGO
    *
    * Calls:
@@ -1127,7 +1400,7 @@ export class OGCMTroubleshoot implements OnInit {
    * SUBMIT TROUBLESHOOTING FORM
    *
    * POST
-   * http://127.0.0.1:8000/api/v1/ogcm/troubleshooting/
+   * http://127.0.0.1:8000/api/v1/ogcm/troubleshoot/
    */
   public onSubmit(): void {
 
@@ -1220,9 +1493,10 @@ export class OGCMTroubleshoot implements OnInit {
     fieldName: string
   ): boolean {
 
-    const field = this.troubleshootingForm.get(
-      `${groupName}.${fieldName}`
-    );
+    const field =
+      this.troubleshootingForm.get(
+        `${groupName}.${fieldName}`
+      );
 
 
     return field

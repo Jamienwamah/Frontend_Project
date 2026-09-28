@@ -15,7 +15,7 @@ interface EntityOption {
 
 
 interface FormCard {
-  id: 'issue' | 'replacement' | 'troubleshooting' | 'infrastructure';
+  id: 'enclusia-access' | 'wealthforge-access' | 'issue' | 'replacement' | 'troubleshooting' | 'infrastructure';
   title: string;
   description: string;
   category: string;
@@ -70,6 +70,38 @@ export class LandingComponent {
   // ============================================================
 
   availableForms: FormCard[] = [
+     {
+      id: 'wealthforge-access',
+
+      title: 'Wealthforge Access Request',
+
+      description:
+        'This is used to grant user access to the wealthforge cloud platform',
+
+      category: 'Wealthforge Access Management',
+
+      iconBg: 'bg-blue-50',
+
+      iconPath:
+        'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+    },
+
+    {
+      id: 'enclusia-access',
+
+      title: 'Enclusia Access Request',
+
+      description:
+        'This is used to grant user access to the enclusia cloud platform',
+
+      category: 'Enclusia Access Management',
+
+      iconBg: 'bg-blue-50',
+
+      iconPath:
+        'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
+    },
+
     {
       id: 'issue',
 

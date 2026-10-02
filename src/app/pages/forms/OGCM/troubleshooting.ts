@@ -179,7 +179,7 @@ export interface DeviceTroubleshootingPayload {
                 <h1
                   class="text-2xl sm:text-3xl font-extrabold tracking-tight"
                 >
-                  Device Troubleshooting Form
+                  OGCM Device Troubleshooting Form
                 </h1>
 
                 <p
@@ -1429,7 +1429,7 @@ export class OGCMTroubleshoot implements OnInit, AfterViewInit {
 
       this.http.post(
 
-        'http://127.0.0.1:8000/api/v1/ogcm/troubleshoot/',
+        'http://localhost:8000/api/v1/ogcm/troubleshoot/',
 
         payload,
 

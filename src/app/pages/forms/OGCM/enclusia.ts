@@ -1,21 +1,30 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 
-import { EntraService } from '../../../core/services/entra.service';
+import {
+  Router,
+  RouterLink
+} from '@angular/router';
+
+import {
+  HttpClient
+} from '@angular/common/http';
+
+import {
+  EntraService
+} from '../../../core/services/entra.service';
 
 
 /**
- * Person the Enclusia access request is being created for.
- *
- * The user is entered manually rather than retrieved from Entra ID.
+ * Person the Enclusia access request
+ * is being created for.
  */
 export interface AccessForUser {
 
@@ -27,14 +36,17 @@ export interface AccessForUser {
 
 
 /**
- * Enclusia Cloud Platform access request payload
+ * Enclusia Cloud Platform access request payload.
+ *
+ * This structure must match the Django
+ * serializer/backend.
  */
 export interface EnclusiaAccessPayload {
 
   currentDate: Date;
 
   /**
-   * Person creating the request
+   * Person creating the request.
    */
   requester: {
 
@@ -43,7 +55,7 @@ export interface EnclusiaAccessPayload {
   };
 
   /**
-   * Person the access is being created for
+   * Person the access is being created for.
    */
   accessFor: {
 
@@ -53,6 +65,10 @@ export interface EnclusiaAccessPayload {
 
   };
 
+  /**
+   * Employee information of the
+   * person creating the request.
+   */
   employee: {
 
     name: string;
@@ -65,6 +81,9 @@ export interface EnclusiaAccessPayload {
 
   };
 
+  /**
+   * Enclusia access being requested.
+   */
   enclusiaAccess: {
 
     role: string;
@@ -81,14 +100,19 @@ export interface EnclusiaAccessPayload {
 
 
 @Component({
+
   selector: 'app-user-access-form',
 
   standalone: true,
 
   imports: [
+
     CommonModule,
+
     ReactiveFormsModule,
+
     RouterLink
+
   ],
 
   template: `
@@ -131,7 +155,9 @@ export interface EnclusiaAccessPayload {
           </a>
 
 
-          <span class="text-xs text-slate-400 font-mono">
+          <span
+            class="text-xs text-slate-400 font-mono"
+          >
 
             Form Ref: ENCLUSIA-ACCESS-2026
 
@@ -146,7 +172,9 @@ export interface EnclusiaAccessPayload {
         >
 
           <!-- FORM BANNER -->
-          <div class="bg-blue-900 text-white p-6 sm:p-8">
+          <div
+            class="bg-blue-900 text-white p-6 sm:p-8"
+          >
 
             <div
               class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
@@ -215,8 +243,7 @@ export interface EnclusiaAccessPayload {
             class="p-6 sm:p-8 space-y-10 text-slate-900"
           >
 
-
-            <!-- SECTION 1: ACCESS REQUEST INFORMATION -->
+            <!-- SECTION 1 -->
             <section class="space-y-5">
 
               <div
@@ -398,8 +425,7 @@ export interface EnclusiaAccessPayload {
             </section>
 
 
-
-            <!-- SECTION 2: EMPLOYEE INFORMATION -->
+            <!-- SECTION 2 -->
             <section
               formGroupName="employee"
               class="space-y-5"
@@ -549,8 +575,7 @@ export interface EnclusiaAccessPayload {
             </section>
 
 
-
-            <!-- SECTION 3: ENCLUSIA CLOUD PLATFORM ACCESS -->
+            <!-- SECTION 3 -->
             <section
               formGroupName="enclusiaAccess"
               class="space-y-5"
@@ -697,7 +722,7 @@ export interface EnclusiaAccessPayload {
                 </div>
 
 
-                <!-- ACCESS SCOPE -->
+                <!-- ROLE DESCRIPTION -->
                 <div>
 
                   <label
@@ -710,9 +735,9 @@ export interface EnclusiaAccessPayload {
 
 
                   <select
-                    formControlName="roleDescriptions"
+                    formControlName="roleDescription"
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'roleDescriptions')"
+                    [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'roleDescription')"
                   >
 
                     <option value="">
@@ -722,11 +747,11 @@ export interface EnclusiaAccessPayload {
                     </option>
 
 
-                    @for (role of roleDescriptions; track role) {
+                    @for (description of roleDescriptions; track description) {
 
-                      <option [value]="role">
+                      <option [value]="description">
 
-                        {{ role }}
+                        {{ description }}
 
                       </option>
 
@@ -736,7 +761,7 @@ export interface EnclusiaAccessPayload {
 
 
                   <span
-                    *ngIf="isGroupFieldInvalid('enclusiaAccess', 'roleDescriptions')"
+                    *ngIf="isGroupFieldInvalid('enclusiaAccess', 'roleDescription')"
                     class="text-xs text-red-500 mt-1 block"
                   >
 
@@ -784,7 +809,6 @@ export interface EnclusiaAccessPayload {
             </section>
 
 
-
             <!-- ACCESS INFORMATION -->
             <div
               class="p-4 bg-slate-50 rounded-2xl border border-slate-200"
@@ -827,7 +851,6 @@ export interface EnclusiaAccessPayload {
             </div>
 
 
-
             <!-- SUBMIT BUTTON -->
             <div
               class="pt-6 border-t border-slate-200 flex justify-end"
@@ -835,10 +858,22 @@ export interface EnclusiaAccessPayload {
 
               <button
                 type="submit"
-                class="px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-xl shadow-md transition-all"
+                [disabled]="isSubmitting"
+                class="px-8 py-3 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium rounded-xl shadow-md transition-all"
               >
 
-                Submit Enclusia Access Request
+                <span *ngIf="!isSubmitting">
+
+                  Submit Enclusia Access Request
+
+                </span>
+
+
+                <span *ngIf="isSubmitting">
+
+                  Submitting...
+
+                </span>
 
               </button>
 
@@ -855,7 +890,11 @@ export interface EnclusiaAccessPayload {
 
   `
 })
-export class UserAccessFormComponent implements OnInit {
+
+
+export class UserAccessFormComponent
+  implements OnInit {
+
 
   private fb = inject(FormBuilder);
 
@@ -866,17 +905,29 @@ export class UserAccessFormComponent implements OnInit {
   private entraService = inject(EntraService);
 
 
+  /**
+   * Reactive form.
+   */
   accessForm!: FormGroup;
 
 
+  /**
+   * Current date displayed
+   * on the form.
+   */
   currentDate: Date = new Date();
 
 
+  /**
+   * Prevents multiple submissions.
+   */
+  isSubmitting = false;
+
 
   /**
-   * Enclusia cloud platform role codes
+   * Enclusia Cloud Platform role codes.
    */
- readonly rolecodes: string[] = [
+  readonly rolecodes: string[] = [
 
     'ADM',
 
@@ -902,15 +953,11 @@ export class UserAccessFormComponent implements OnInit {
 
     'TR_OPS'
 
-
   ];
 
 
-
-
-
   /**
-   * Enclusia Cloud Platform roles
+   * Enclusia Cloud Platform roles.
    */
   readonly enclusiaRoles: string[] = [
 
@@ -941,9 +988,8 @@ export class UserAccessFormComponent implements OnInit {
   ];
 
 
-
   /**
-   * Enclusia access scopes
+   * Enclusia role descriptions.
    */
   readonly roleDescriptions: string[] = [
 
@@ -974,15 +1020,15 @@ export class UserAccessFormComponent implements OnInit {
   ];
 
 
-
   ngOnInit(): void {
 
+    /**
+     * Initialize form.
+     */
     this.accessForm = this.fb.group({
 
       /**
        * Person receiving the access.
-       *
-       * This is entered manually.
        */
       accessForName: [
 
@@ -994,10 +1040,7 @@ export class UserAccessFormComponent implements OnInit {
 
 
       /**
-       * Official Microsoft account
-       *
-       * Only @optimum-g.com accounts
-       * are accepted.
+       * Official Microsoft account.
        */
       accessForEmail: [
 
@@ -1016,18 +1059,18 @@ export class UserAccessFormComponent implements OnInit {
       ],
 
 
-
       /**
-       * Employee information
-       *
-       * This remains the information
-       * of the person submitting the request.
+       * Employee information of
+       * the authenticated requester.
        */
       employee: this.fb.group({
 
         name: [
 
-          { value: '', disabled: true },
+          {
+            value: '',
+            disabled: true
+          },
 
           Validators.required
 
@@ -1036,7 +1079,10 @@ export class UserAccessFormComponent implements OnInit {
 
         department: [
 
-          { value: '', disabled: true },
+          {
+            value: '',
+            disabled: true
+          },
 
           Validators.required
 
@@ -1045,7 +1091,10 @@ export class UserAccessFormComponent implements OnInit {
 
         jobTitle: [
 
-          { value: '', disabled: true },
+          {
+            value: '',
+            disabled: true
+          },
 
           Validators.required
 
@@ -1063,9 +1112,8 @@ export class UserAccessFormComponent implements OnInit {
       }),
 
 
-
       /**
-       * Enclusia Cloud Platform access
+       * Enclusia access information.
        */
       enclusiaAccess: this.fb.group({
 
@@ -1109,20 +1157,18 @@ export class UserAccessFormComponent implements OnInit {
     });
 
 
-
     /**
-     * Load current requester's
-     * employee information.
+     * Load authenticated user's
+     * Microsoft Entra information.
      */
     this.loadEmployeeInformation();
 
   }
 
 
-
   /**
-   * Validate that the email belongs
-   * to the official Optimum domain.
+   * Validate that the supplied email
+   * belongs to the Optimum corporate domain.
    */
   private optimumEmailValidator = (
     control: any
@@ -1144,9 +1190,7 @@ export class UserAccessFormComponent implements OnInit {
     if (!value.endsWith('@optimum-g.com')) {
 
       return {
-
         optimumEmail: true
-
       };
 
     }
@@ -1157,180 +1201,40 @@ export class UserAccessFormComponent implements OnInit {
   };
 
 
-
   /**
    * Retrieve current requester's
-   * information from Microsoft Entra.
-   *
-   * This remains unchanged.
+   * employee information from Entra.
    */
   private loadEmployeeInformation(): void {
 
-    this.entraService.getMyProfile().subscribe({
+    this.entraService.getMyProfile()
+      .subscribe({
 
-      next: (response) => {
-
-        this.accessForm
-          .get('employee')
-          ?.patchValue({
-
-            name:
-              response.profile.name,
-
-            department:
-              response.profile.department,
-
-            jobTitle:
-              response.profile.jobTitle
-
-          });
-
-      },
-
-
-      error: (error) => {
-
-        console.error(
-
-          'Unable to load employee information:',
-
-          error
-
-        );
-
-
-        alert(
-
-          'Unable to retrieve your Microsoft employee information.'
-
-        );
-
-      }
-
-    });
-
-  }
-
-
-
-  /**
-   * Submit Enclusia Cloud Platform
-   * access request.
-   */
-  public onSubmit(): void {
-
-    if (this.accessForm.valid) {
-
-      const formValue =
-        this.accessForm.getRawValue();
-
-
-
-      const payload: EnclusiaAccessPayload = {
-
-        currentDate:
-          this.currentDate,
-
-
-        requester: {
-
-          name:
-            formValue.employee.name
-
-        },
-
-
-        accessFor: {
-
-          name:
-            formValue.accessForName.trim(),
-
-          email:
-            formValue.accessForEmail.trim().toLowerCase()
-
-        },
-
-
-        employee: {
-
-          name:
-            formValue.employee.name,
-
-          department:
-            formValue.employee.department,
-
-          jobTitle:
-            formValue.employee.jobTitle,
-
-          employeeId:
-            formValue.employee.employeeId
-
-        },
-
-
-        enclusiaAccess: {
-
-          role:
-            formValue.enclusiaAccess.role,
-
-          rolecode:
-            formValue.enclusiaAccess.rolecode,
-
-          roleDescription:
-            formValue.enclusiaAccess.accessScope,
-
-          reason:
-            formValue.enclusiaAccess.reason
-
-        }
-
-      };
-
-
-
-      console.log(
-
-        'Enclusia Access Request Payload:',
-
-        payload
-
-      );
-
-
-
-      this.http.post(
-
-        'http://localhost:8000/api/v1/access/user/',
-
-        payload,
-
-        {
-
-          withCredentials: true
-
-        }
-
-      ).subscribe({
-
-        next: (response) => {
+        next: (response: any) => {
 
           console.log(
-
-            'Enclusia Access Request Created:',
-
+            'Microsoft Entra profile:',
             response
-
           );
 
 
-          alert(
+          this.accessForm
+            .get('employee')
+            ?.patchValue({
 
-            'Enclusia Cloud Platform access request submitted successfully!'
+              name:
+                response.profile?.name || '',
 
-          );
+              department:
+                response.profile?.department || '',
 
+              jobTitle:
+                response.profile?.jobTitle || '',
 
-          this.router.navigate(['/']);
+              employeeId:
+                response.profile?.employeeId || ''
+
+            });
 
         },
 
@@ -1338,45 +1242,288 @@ export class UserAccessFormComponent implements OnInit {
         error: (error) => {
 
           console.error(
-
-            'Enclusia Access Request Error:',
-
+            'Unable to load employee information:',
             error
-
           );
 
 
           alert(
-
-            error?.error?.detail ||
-
-            error?.error?.message ||
-
-            'Failed to submit the Enclusia access request. Please try again.'
-
+            'Unable to retrieve your Microsoft employee information.'
           );
 
         }
 
       });
 
+  }
+
+
+  /**
+   * Submit the Enclusia Cloud Platform
+   * access request to Django.
+   */
+  public onSubmit(): void {
+
+    /**
+     * Prevent another request while
+     * the current request is processing.
+     */
+    if (this.isSubmitting) {
+
+      return;
+
     }
 
-    else {
+
+    /**
+     * Validate form.
+     */
+    if (this.accessForm.invalid) {
 
       this.accessForm.markAllAsTouched();
 
-
       alert(
-
         'Please fill out all required fields.'
-
       );
+
+      return;
 
     }
 
-  }
 
+    /**
+     * Set submitting state.
+     */
+    this.isSubmitting = true;
+
+
+    /**
+     * getRawValue() is important because
+     * name, department and jobTitle are
+     * disabled controls.
+     */
+    const formValue =
+      this.accessForm.getRawValue();
+
+
+    /**
+     * Build the exact payload expected
+     * by the Django serializer.
+     */
+    const payload: EnclusiaAccessPayload = {
+
+      currentDate:
+        this.currentDate,
+
+
+      requester: {
+
+        name:
+          formValue.employee.name
+
+      },
+
+
+      accessFor: {
+
+        name:
+          String(
+            formValue.accessForName || ''
+          ).trim(),
+
+        email:
+          String(
+            formValue.accessForEmail || ''
+          )
+            .trim()
+            .toLowerCase()
+
+      },
+
+
+      employee: {
+
+        name:
+          formValue.employee.name,
+
+        department:
+          formValue.employee.department,
+
+        jobTitle:
+          formValue.employee.jobTitle,
+
+        employeeId:
+          String(
+            formValue.employee.employeeId || ''
+          ).trim()
+
+      },
+
+
+      enclusiaAccess: {
+
+        role:
+          formValue.enclusiaAccess.role,
+
+        rolecode:
+          formValue.enclusiaAccess.rolecode,
+
+        /**
+         * IMPORTANT:
+         *
+         * This must be roleDescription.
+         *
+         * The previous code incorrectly used:
+         *
+         * formValue.enclusiaAccess.accessScope
+         */
+        roleDescription:
+          formValue.enclusiaAccess.roleDescription,
+
+        reason:
+          String(
+            formValue.enclusiaAccess.reason || ''
+          ).trim()
+
+      }
+
+    };
+
+
+    /**
+     * Display payload in browser console
+     * for troubleshooting.
+     */
+    console.log(
+      'Submitting Enclusia Access Request:',
+      payload
+    );
+
+
+    /**
+     * Send request to Django REST API.
+     *
+     * withCredentials is required because
+     * your authentication/session and CSRF
+     * setup use cookies.
+     */
+    this.http.post(
+
+      'http://localhost:8000/api/v1/enclusia/user/',
+
+      payload,
+
+      {
+        withCredentials: true
+      }
+
+    ).subscribe({
+
+      /**
+       * Django successfully created
+       * the database record.
+       */
+      next: (response: any) => {
+
+        console.log(
+          'Enclusia Access Request Created:',
+          response
+        );
+
+
+        this.isSubmitting = false;
+
+
+        alert(
+          'Enclusia Cloud Platform access request submitted successfully!'
+        );
+
+
+        /**
+         * Return to portal landing page
+         * after successful submission.
+         */
+        this.router.navigate([
+          '/'
+        ]);
+
+      },
+
+
+      /**
+       * Django rejected the request.
+       */
+      error: (error: any) => {
+
+        console.error(
+          'Enclusia Access Request Error:',
+          error
+        );
+
+
+        this.isSubmitting = false;
+
+
+        /**
+         * Log the complete backend
+         * validation response.
+         */
+        if (error?.error) {
+
+          console.error(
+            'Backend Response:',
+            error.error
+          );
+
+        }
+
+
+        /**
+         * Handle Django validation errors.
+         */
+        if (error?.error?.errors) {
+
+          console.error(
+            'Validation Errors:',
+            error.error.errors
+          );
+
+        }
+
+
+        let message =
+          'Failed to submit the Enclusia access request. Please try again.';
+
+
+        if (error?.error?.detail) {
+
+          message =
+            error.error.detail;
+
+        }
+
+        else if (error?.error?.message) {
+
+          message =
+            error.error.message;
+
+        }
+
+        else if (error?.error?.errors) {
+
+          message =
+            'Please correct the highlighted form information and try again.';
+
+        }
+
+
+        alert(message);
+
+      }
+
+    });
+
+  }
 
 
   /**
@@ -1391,29 +1538,29 @@ export class UserAccessFormComponent implements OnInit {
   ): boolean {
 
     const field =
-
       this.accessForm.get(
-
         `${groupName}.${fieldName}`
-
       );
 
 
-    return field
+    return !!(
 
-      ? field.invalid &&
+      field &&
 
-        (field.dirty || field.touched)
+      field.invalid &&
 
-      : false;
+      (
+        field.dirty ||
+        field.touched
+      )
+
+    );
 
   }
 
 
-
   /**
-   * Check validation for a
-   * top-level form field.
+   * Check top-level form field validation.
    */
   public isFieldInvalid(
 
@@ -1422,17 +1569,23 @@ export class UserAccessFormComponent implements OnInit {
   ): boolean {
 
     const field =
+      this.accessForm.get(
+        fieldName
+      );
 
-      this.accessForm.get(fieldName);
 
+    return !!(
 
-    return field
+      field &&
 
-      ? field.invalid &&
+      field.invalid &&
 
-        (field.dirty || field.touched)
+      (
+        field.dirty ||
+        field.touched
+      )
 
-      : false;
+    );
 
   }
 

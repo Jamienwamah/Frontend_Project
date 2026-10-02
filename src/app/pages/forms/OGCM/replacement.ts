@@ -139,7 +139,7 @@ export interface DeviceReplacementPayload {
                 <h1
                   class="text-2xl sm:text-3xl font-extrabold tracking-tight"
                 >
-                  Device Replacement Form
+                  OGCM Device Replacement Form
                 </h1>
 
                 <p

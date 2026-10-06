@@ -13,6 +13,12 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./routes/forms.route').then((m) => m.FORM_ROUTES),
   },
+  {
+  path: 'admin/approvals',
+  loadComponent: () =>
+    import('./access-control/approvals.dashboard').then(m => m.ApprovalDashboardComponent),
+  title: 'Approval Dashboard',
+},
 
   {
     path: '**',

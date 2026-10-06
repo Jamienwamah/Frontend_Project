@@ -1,0 +1,180 @@
+<div class="approvals-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Form Approval Requests</h1>
+      <p>
+        Review and manage submitted forms requiring departmental approval.
+      </p>
+    </div>
+
+    <div class="status-filter">
+      <label for="status">Status</label>
+
+      <select
+        id="status"
+        [(ngModel)]="selectedStatus"
+        (change)="changeStatus()"
+      >
+        <option value="PENDING">Pending</option>
+        <option value="APPROVED">Approved</option>
+        <option value="REJECTED">Rejected</option>
+      </select>
+    </div>
+  </div>
+
+
+  <div *ngIf="loading" class="loading">
+    Loading approval requests...
+  </div>
+
+
+  <div
+    *ngIf="!loading && requests.length === 0"
+    class="empty-state"
+  >
+    No approval requests found.
+  </div>
+
+
+  <div
+    *ngIf="!loading && requests.length > 0"
+    class="requests-list"
+  >
+
+    <div
+      *ngFor="let request of requests"
+      class="request-card"
+    >
+
+      <div class="request-header">
+
+        <div>
+          <h2>{{ request.form_code }}</h2>
+
+          <span
+            class="status"
+            [class.pending]="request.status === 'PENDING'"
+            [class.approved]="request.status === 'APPROVED'"
+            [class.rejected]="request.status === 'REJECTED'"
+          >
+            {{ request.status }}
+          </span>
+        </div>
+
+        <div class="submitted-date">
+          {{ request.submitted_at | date:'medium' }}
+        </div>
+
+      </div>
+
+
+      <div class="request-details">
+
+        <div>
+          <span>Employee</span>
+          <strong>{{ request.user_name }}</strong>
+        </div>
+
+        <div>
+          <span>Email</span>
+          <strong>{{ request.user_email }}</strong>
+        </div>
+
+        <div>
+          <span>Employee Department</span>
+          <strong>{{ request.user_department }}</strong>
+        </div>
+
+        <div>
+          <span>Job Title</span>
+          <strong>{{ request.user_job_title }}</strong>
+        </div>
+
+        <div>
+          <span>Approval Department</span>
+          <strong>{{ request.department }}</strong>
+        </div>
+
+        <div>
+          <span>Approval Email</span>
+          <strong>{{ request.department_email }}</strong>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="request.reason"
+        class="request-reason"
+      >
+        <span>Reason</span>
+        <p>{{ request.reason }}</p>
+      </div>
+
+
+      <div
+        *ngIf="request.status === 'PENDING'"
+        class="approval-actions"
+      >
+
+        <label [for]="'comment-' + request.id">
+          Comment
+        </label>
+
+        <textarea
+          [id]="'comment-' + request.id"
+          rows="3"
+          [ngModel]="getComment(request.id)"
+          (ngModelChange)="setComment(request.id, $event)"
+          placeholder="Add an optional comment"
+        ></textarea>
+
+
+        <div class="action-buttons">
+
+          <button
+            type="button"
+            class="approve-button"
+            [disabled]="processingId === request.id"
+            (click)="approve(request)"
+          >
+            {{
+              processingId === request.id
+                ? 'Processing...'
+                : 'Approve'
+            }}
+          </button>
+
+
+          <button
+            type="button"
+            class="reject-button"
+            [disabled]="processingId === request.id"
+            (click)="reject(request)"
+          >
+            {{
+              processingId === request.id
+                ? 'Processing...'
+                : 'Reject'
+            }}
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="request.status !== 'PENDING' && request.approver_comment"
+        class="admin-comment"
+      >
+        <span>Approver Comment</span>
+        <p>{{ request.approver_comment }}</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

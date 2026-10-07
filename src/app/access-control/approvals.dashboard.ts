@@ -28,13 +28,20 @@ export class ApprovalDashboardComponent implements OnInit {
   };
 
   loading = true;
+  refreshing = false;
+  refreshClicked = false;
+
   selectedStatus = '';
   selectedDepartment = '';
   selectedForm = '';
   searchTerm = '';
+
   selectedRequest: ApprovalRequest | null = null;
+
   processingId: number | null = null;
+
   comment = '';
+
   errorMessage = '';
   successMessage = '';
 
@@ -45,51 +52,114 @@ export class ApprovalDashboardComponent implements OnInit {
   }
 
   loadDashboard(): void {
-  console.log('LOAD DASHBOARD CALLED:', new Date().toISOString());
+    console.log('LOAD DASHBOARD CALLED:', new Date().toISOString());
 
-  this.loading = true;
-  this.errorMessage = '';
+    this.loading = true;
+    this.errorMessage = '';
 
-  forkJoin({
-    stats: this.accessService.getApprovalStats(),
-    requests: this.accessService.getApprovalRequests(
-      this.selectedStatus,
-      this.selectedDepartment,
-      this.selectedForm,
-      this.searchTerm
-    )
-  }).subscribe({
-    next: result => {
-      console.log('REQUEST DATA:', result.requests);
-      console.log('REQUEST COUNT:', result.requests.length);
+    forkJoin({
+      stats: this.accessService.getApprovalStats(),
+      requests: this.accessService.getApprovalRequests(
+        this.selectedStatus,
+        this.selectedDepartment,
+        this.selectedForm,
+        this.searchTerm
+      )
+    }).subscribe({
+      next: result => {
+        console.log('REQUEST DATA:', result.requests);
+        console.log('REQUEST COUNT:', result.requests.length);
 
-      this.stats = result.stats;
-      this.requests = result.requests;
+        this.stats = result.stats;
+        this.requests = result.requests;
 
-      console.log('COMPONENT REQUESTS:', this.requests);
-      console.log('LOADING BEFORE:', this.loading);
+        console.log('COMPONENT REQUESTS:', this.requests);
 
-      this.loading = false;
+        this.loading = false;
+      },
 
-      console.log('LOADING AFTER:', this.loading);
-    },
-    error: error => {
-      console.error('APPROVAL DASHBOARD ERROR:', error);
-      this.requests = [];
-      this.loading = false;
-      this.errorMessage = error?.error?.detail || 'Unable to load approval dashboard.';
+      error: error => {
+        console.error('APPROVAL DASHBOARD ERROR:', error);
+
+        this.requests = [];
+        this.loading = false;
+
+        this.errorMessage =
+          error?.error?.detail ||
+          'Unable to load approval dashboard.';
+      }
+    });
+  }
+
+  /**
+   * Refresh the dashboard without refreshing the browser.
+   * Keeps the current search/filter selections.
+   * Shows × for 2 seconds after clicking.
+   */
+  refreshDashboard(): void {
+    if (this.refreshClicked) {
+      return;
     }
-  });
-}
 
+    console.log('REFRESH DASHBOARD CLICKED:', new Date().toISOString());
+
+    this.refreshClicked = true;
+    this.refreshing = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    forkJoin({
+      stats: this.accessService.getApprovalStats(),
+      requests: this.accessService.getApprovalRequests(
+        this.selectedStatus,
+        this.selectedDepartment,
+        this.selectedForm,
+        this.searchTerm
+      )
+    }).subscribe({
+      next: result => {
+        console.log('REFRESHED REQUEST DATA:', result.requests);
+        console.log('REFRESHED REQUEST COUNT:', result.requests.length);
+
+        this.stats = result.stats;
+        this.requests = result.requests;
+
+        console.log('REFRESHED COMPONENT REQUESTS:', this.requests);
+
+        this.refreshing = false;
+
+        setTimeout(() => {
+          this.refreshClicked = false;
+        }, 2000);
+      },
+
+      error: error => {
+        console.error('DASHBOARD REFRESH ERROR:', error);
+
+        this.refreshing = false;
+
+        this.errorMessage =
+          error?.error?.detail ||
+          'Unable to refresh approval dashboard.';
+
+        setTimeout(() => {
+          this.refreshClicked = false;
+        }, 2000);
+      }
+    });
+  }
 
   loadStats(): void {
     this.accessService.getApprovalStats().subscribe({
       next: stats => {
         this.stats = stats;
       },
+
       error: error => {
-        console.error('Unable to load approval statistics:', error);
+        console.error(
+          'Unable to load approval statistics:',
+          error
+        );
       }
     });
   }
@@ -108,12 +178,19 @@ export class ApprovalDashboardComponent implements OnInit {
         this.requests = requests;
         this.loading = false;
       },
+
       error: error => {
-        console.error('Unable to load approval requests:', error);
+        console.error(
+          'Unable to load approval requests:',
+          error
+        );
 
         this.requests = [];
         this.loading = false;
-        this.errorMessage = error?.error?.detail || 'Unable to load approval requests.';
+
+        this.errorMessage =
+          error?.error?.detail ||
+          'Unable to load approval requests.';
       }
     });
   }
@@ -127,6 +204,7 @@ export class ApprovalDashboardComponent implements OnInit {
     this.selectedDepartment = '';
     this.selectedForm = '';
     this.searchTerm = '';
+
     this.loadRequests();
   }
 
@@ -162,12 +240,15 @@ export class ApprovalDashboardComponent implements OnInit {
 
         this.loadDashboard();
       },
+
       error: error => {
         console.error('Approval failed:', error);
 
         this.processingId = null;
+
         this.errorMessage =
-          error?.error?.detail || 'Unable to approve request.';
+          error?.error?.detail ||
+          'Unable to approve request.';
       }
     });
   }
@@ -192,14 +273,81 @@ export class ApprovalDashboardComponent implements OnInit {
 
         this.loadDashboard();
       },
+
       error: error => {
         console.error('Rejection failed:', error);
 
         this.processingId = null;
+
         this.errorMessage =
-          error?.error?.detail || 'Unable to reject request.';
+          error?.error?.detail ||
+          'Unable to reject request.';
       }
     });
+  }
+
+  getAccessForDetails(
+    request: ApprovalRequest
+  ): {
+    name: string;
+    email: string;
+    department: string;
+  } {
+
+    const submissionData: any =
+      request.submission_data || {};
+
+    const accessFor =
+      submissionData.verifiedAccessFor;
+
+    return {
+      name:
+        accessFor?.name ||
+        submissionData.accessFor?.name ||
+        '—',
+
+      email:
+        accessFor?.email ||
+        submissionData.accessFor?.email ||
+        '—',
+
+      department:
+        accessFor?.department ||
+        request.department ||
+        '—'
+    };
+  }
+
+  getRequesterDetails(
+    request: ApprovalRequest
+  ): {
+    name: string;
+    email: string;
+    department: string;
+  } {
+
+    const submissionData: any =
+      request.submission_data || {};
+
+    const requester =
+      submissionData.verifiedRequester;
+
+    return {
+      name:
+        requester?.name ||
+        request.user_name ||
+        '—',
+
+      email:
+        requester?.email ||
+        request.user_email ||
+        '—',
+
+      department:
+        requester?.department ||
+        request.user_department ||
+        '—'
+    };
   }
 
   getStatusClass(status: string): string {
@@ -222,19 +370,27 @@ export class ApprovalDashboardComponent implements OnInit {
     return names[formCode] || formCode;
   }
 
-  getSubmissionEntries(request: ApprovalRequest): { key: string; value: any }[] {
+  getSubmissionEntries(
+    request: ApprovalRequest
+  ): { key: string; value: any }[] {
     if (!request.submission_data) {
       return [];
     }
 
-    return Object.entries(request.submission_data).map(([key, value]) => ({
-      key,
-      value
-    }));
+    return Object.entries(request.submission_data).map(
+      ([key, value]) => ({
+        key,
+        value
+      })
+    );
   }
 
   formatValue(value: any): string {
-    if (value === null || value === undefined || value === '') {
+    if (
+      value === null ||
+      value === undefined ||
+      value === ''
+    ) {
       return '—';
     }
 

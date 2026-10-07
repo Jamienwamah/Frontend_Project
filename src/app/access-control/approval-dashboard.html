@@ -226,6 +226,24 @@
       Clear
     </button>
 
+
+    <button
+      type="button"
+      class="refresh-btn"
+      [disabled]="refreshClicked"
+      (click)="refreshDashboard()"
+      title="Refresh dashboard"
+      aria-label="Refresh dashboard"
+    >
+
+      <span
+        class="refresh-icon"
+      >
+        {{ refreshClicked ? '×' : '↻' }}
+      </span>
+
+    </button>
+
   </div>
 
 
@@ -432,209 +450,222 @@
 
       <div class="modal-body">
 
-        <!-- EMPLOYEE -->
+  <!-- ACCESS REQUESTED FOR -->
 
-        <section>
+  <section>
 
-          <h3>
-            Employee Information
-          </h3>
+    <h3>
+      ACCESS REQUESTED FOR
+    </h3>
 
-          <div class="details-grid">
+    <div class="details-grid">
 
-            <div>
-              <label>Name</label>
-              <span>
-                {{ selectedRequest.user_name }}
-              </span>
-            </div>
+      <div>
+        <label>Name</label>
 
-            <div>
-              <label>Email</label>
-              <span>
-                {{ selectedRequest.user_email }}
-              </span>
-            </div>
-
-            <div>
-              <label>Department</label>
-              <span>
-                {{ selectedRequest.user_department || selectedRequest.department }}
-              </span>
-            </div>
-
-            <div>
-              <label>Job Title</label>
-              <span>
-                {{ selectedRequest.user_job_title || '—' }}
-              </span>
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- APPROVAL -->
-
-        <section>
-
-          <h3>
-            Approval Information
-          </h3>
-
-          <div class="details-grid">
-
-            <div>
-              <label>Approval Department</label>
-              <span>
-                {{ selectedRequest.department }}
-              </span>
-            </div>
-
-            <div>
-              <label>Status</label>
-
-              <span
-                class="status"
-                [ngClass]="getStatusClass(selectedRequest.status)"
-              >
-                {{ selectedRequest.status }}
-              </span>
-
-            </div>
-
-            <div>
-              <label>Submitted</label>
-              <span>
-                {{ selectedRequest.submitted_at | date:'medium' }}
-              </span>
-            </div>
-
-            <div>
-              <label>Reviewed</label>
-              <span>
-                {{
-                  selectedRequest.reviewed_at
-                    ? (selectedRequest.reviewed_at | date:'medium')
-                    : 'Not reviewed'
-                }}
-              </span>
-            </div>
-
-            <div>
-              <label>Reviewed By</label>
-              <span>
-                {{ selectedRequest.reviewed_by_name || '—' }}
-              </span>
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- REASON -->
-
-        <section>
-
-          <h3>
-            Reason
-          </h3>
-
-          <p class="reason">
-            {{ selectedRequest.reason || 'No reason provided.' }}
-          </p>
-
-        </section>
-
-
-        <!-- SUBMISSION -->
-
-        <section>
-
-          <h3>
-            Submitted Form Details
-          </h3>
-
-
-          <div
-            class="submission-data"
-            *ngIf="getSubmissionEntries(selectedRequest).length"
-          >
-
-            <div
-              class="submission-row"
-              *ngFor="
-                let entry of
-                getSubmissionEntries(selectedRequest)
-              "
-            >
-
-              <span class="submission-key">
-                {{ entry.key }}
-              </span>
-
-              <span class="submission-value">
-                {{ formatValue(entry.value) }}
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div
-            class="no-data"
-            *ngIf="
-              !getSubmissionEntries(selectedRequest).length
-            "
-          >
-            No submitted form data available.
-          </div>
-
-        </section>
-
-
-        <!-- COMMENT -->
-
-        <section
-          *ngIf="selectedRequest.status === 'PENDING'"
-        >
-
-          <h3>
-            Approver Comment
-          </h3>
-
-          <textarea
-            [(ngModel)]="comment"
-            rows="4"
-            placeholder="Enter a comment..."
-          ></textarea>
-
-        </section>
-
-
-        <!-- EXISTING COMMENT -->
-
-        <section
-          *ngIf="
-            selectedRequest.status !== 'PENDING'
-            && selectedRequest.approver_comment
-          "
-        >
-
-          <h3>
-            Approver Comment
-          </h3>
-
-          <p class="reason">
-            {{ selectedRequest.approver_comment }}
-          </p>
-
-        </section>
-
+        <span>
+          {{ getAccessForDetails(selectedRequest).name }}
+        </span>
       </div>
+
+
+      <div>
+        <label>Email</label>
+
+        <span>
+          {{ getAccessForDetails(selectedRequest).email }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Department</label>
+
+        <span>
+          {{ getAccessForDetails(selectedRequest).department }}
+        </span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- REQUEST CREATED BY -->
+
+  <section>
+
+    <h3>
+      REQUEST CREATED BY
+    </h3>
+
+    <div class="details-grid">
+
+      <div>
+        <label>Name</label>
+
+        <span>
+          {{ getRequesterDetails(selectedRequest).name }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Email</label>
+
+        <span>
+          {{ getRequesterDetails(selectedRequest).email }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Department</label>
+
+        <span>
+          {{ getRequesterDetails(selectedRequest).department }}
+        </span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- APPROVAL INFORMATION -->
+
+  <section>
+
+    <h3>
+      APPROVAL INFORMATION
+    </h3>
+
+    <div class="details-grid">
+
+      <div>
+        <label>Approval Department</label>
+
+        <span>
+          {{ selectedRequest.department }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Status</label>
+
+        <span
+          class="status"
+          [ngClass]="getStatusClass(selectedRequest.status)"
+        >
+          {{ selectedRequest.status }}
+        </span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SUBMITTED -->
+
+  <section>
+
+    <h3>
+      REQUEST INFORMATION
+    </h3>
+
+    <div class="details-grid">
+
+      <div>
+        <label>Submitted</label>
+
+        <span>
+          {{ selectedRequest.submitted_at | date:'medium' }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Reviewed</label>
+
+        <span>
+          {{
+            selectedRequest.reviewed_at
+              ? (selectedRequest.reviewed_at | date:'medium')
+              : 'Not reviewed'
+          }}
+        </span>
+      </div>
+
+
+      <div>
+        <label>Reviewed By</label>
+
+        <span>
+          {{ selectedRequest.reviewed_by_name || '—' }}
+        </span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- REASON -->
+
+  <section>
+
+    <h3>
+      REASON
+    </h3>
+
+    <p class="reason">
+      {{ selectedRequest.reason || 'No reason provided.' }}
+    </p>
+
+  </section>
+
+
+  <!-- COMMENT -->
+
+  <section
+    *ngIf="selectedRequest.status === 'PENDING'"
+  >
+
+    <h3>
+      Approver Comment
+    </h3>
+
+    <textarea
+      [(ngModel)]="comment"
+      rows="4"
+      placeholder="Enter a comment..."
+    ></textarea>
+
+  </section>
+
+
+  <!-- EXISTING COMMENT -->
+
+  <section
+    *ngIf="
+      selectedRequest.status !== 'PENDING'
+      && selectedRequest.approver_comment
+    "
+  >
+
+    <h3>
+      Approver Comment
+    </h3>
+
+    <p class="reason">
+      {{ selectedRequest.approver_comment }}
+    </p>
+
+  </section>
+
+</div>
 
 
       <!-- ACTIONS -->

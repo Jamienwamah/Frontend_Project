@@ -889,6 +889,7 @@ export interface EnclusiaAccessPayload {
     </div>
 
   `
+
 })
 
 
@@ -1368,15 +1369,6 @@ export class UserAccessFormComponent
         rolecode:
           formValue.enclusiaAccess.rolecode,
 
-        /**
-         * IMPORTANT:
-         *
-         * This must be roleDescription.
-         *
-         * The previous code incorrectly used:
-         *
-         * formValue.enclusiaAccess.accessScope
-         */
         roleDescription:
           formValue.enclusiaAccess.roleDescription,
 
@@ -1403,9 +1395,9 @@ export class UserAccessFormComponent
     /**
      * Send request to Django REST API.
      *
-     * withCredentials is required because
-     * your authentication/session and CSRF
-     * setup use cookies.
+     * The Django endpoint is responsible for
+     * creating the Enclusia form record and
+     * its approval request.
      */
     this.http.post(
 

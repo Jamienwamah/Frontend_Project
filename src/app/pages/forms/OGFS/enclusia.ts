@@ -46,6 +46,11 @@ export interface EnclusiaAccessPayload {
   currentDate: Date;
 
   /**
+   * Form code used by the approval system.
+   */
+  formCode: string;
+
+  /**
    * Person creating the request.
    */
   requester: {
@@ -889,6 +894,7 @@ export interface EnclusiaAccessPayload {
     </div>
 
   `
+
 })
 
 
@@ -922,6 +928,16 @@ export class OGFSUserAccessFormComponent
    * Prevents multiple submissions.
    */
   isSubmitting = false;
+
+
+  /**
+   * Enclusia Cloud Platform form code.
+   *
+   * This is the same code used by
+   * the Django approval workflow.
+   */
+  readonly formCode =
+    'OST-ENCLUSIA-ACCESS';
 
 
   /**
@@ -1171,12 +1187,17 @@ export class OGFSUserAccessFormComponent
    * belongs to the Optimum corporate domain.
    */
   private optimumEmailValidator = (
+
     control: any
+
   ) => {
 
     const value =
+
       String(control.value || '')
+
         .trim()
+
         .toLowerCase();
 
 
@@ -1190,7 +1211,9 @@ export class OGFSUserAccessFormComponent
     if (!value.endsWith('@optimum-g.com')) {
 
       return {
+
         optimumEmail: true
+
       };
 
     }
@@ -1208,30 +1231,40 @@ export class OGFSUserAccessFormComponent
   private loadEmployeeInformation(): void {
 
     this.entraService.getMyProfile()
+
       .subscribe({
 
         next: (response: any) => {
 
           console.log(
+
             'Microsoft Entra profile:',
+
             response
+
           );
 
 
           this.accessForm
+
             .get('employee')
+
             ?.patchValue({
 
               name:
+
                 response.profile?.name || '',
 
               department:
+
                 response.profile?.department || '',
 
               jobTitle:
+
                 response.profile?.jobTitle || '',
 
               employeeId:
+
                 response.profile?.employeeId || ''
 
             });
@@ -1242,13 +1275,18 @@ export class OGFSUserAccessFormComponent
         error: (error) => {
 
           console.error(
+
             'Unable to load employee information:',
+
             error
+
           );
 
 
           alert(
+
             'Unable to retrieve your Microsoft employee information.'
+
           );
 
         }
@@ -1283,7 +1321,9 @@ export class OGFSUserAccessFormComponent
       this.accessForm.markAllAsTouched();
 
       alert(
+
         'Please fill out all required fields.'
+
       );
 
       return;
@@ -1303,6 +1343,7 @@ export class OGFSUserAccessFormComponent
      * disabled controls.
      */
     const formValue =
+
       this.accessForm.getRawValue();
 
 
@@ -1313,12 +1354,19 @@ export class OGFSUserAccessFormComponent
     const payload: EnclusiaAccessPayload = {
 
       currentDate:
+
         this.currentDate,
+
+
+      formCode:
+
+        this.formCode,
 
 
       requester: {
 
         name:
+
           formValue.employee.name
 
       },
@@ -1327,15 +1375,23 @@ export class OGFSUserAccessFormComponent
       accessFor: {
 
         name:
+
           String(
+
             formValue.accessForName || ''
+
           ).trim(),
 
         email:
+
           String(
+
             formValue.accessForEmail || ''
+
           )
+
             .trim()
+
             .toLowerCase()
 
       },
@@ -1344,17 +1400,23 @@ export class OGFSUserAccessFormComponent
       employee: {
 
         name:
+
           formValue.employee.name,
 
         department:
+
           formValue.employee.department,
 
         jobTitle:
+
           formValue.employee.jobTitle,
 
         employeeId:
+
           String(
+
             formValue.employee.employeeId || ''
+
           ).trim()
 
       },
@@ -1363,26 +1425,23 @@ export class OGFSUserAccessFormComponent
       enclusiaAccess: {
 
         role:
+
           formValue.enclusiaAccess.role,
 
         rolecode:
+
           formValue.enclusiaAccess.rolecode,
 
-        /**
-         * IMPORTANT:
-         *
-         * This must be roleDescription.
-         *
-         * The previous code incorrectly used:
-         *
-         * formValue.enclusiaAccess.accessScope
-         */
         roleDescription:
+
           formValue.enclusiaAccess.roleDescription,
 
         reason:
+
           String(
+
             formValue.enclusiaAccess.reason || ''
+
           ).trim()
 
       }
@@ -1395,17 +1454,24 @@ export class OGFSUserAccessFormComponent
      * for troubleshooting.
      */
     console.log(
+
       'Submitting Enclusia Access Request:',
+
       payload
+
     );
 
 
     /**
-     * Send request to Django REST API.
+     * Send request to Django.
      *
-     * withCredentials is required because
-     * your authentication/session and CSRF
-     * setup use cookies.
+     * Django will create the pending
+     * ApprovalRequest using:
+     *
+     * OST-ENCLUSIA-ACCESS
+     *
+     * with the appropriate approval
+     * department and submission data.
      */
     this.http.post(
 
@@ -1414,7 +1480,9 @@ export class OGFSUserAccessFormComponent
       payload,
 
       {
+
         withCredentials: true
+
       }
 
     ).subscribe({
@@ -1426,8 +1494,11 @@ export class OGFSUserAccessFormComponent
       next: (response: any) => {
 
         console.log(
+
           'Enclusia Access Request Created:',
+
           response
+
         );
 
 
@@ -1435,7 +1506,9 @@ export class OGFSUserAccessFormComponent
 
 
         alert(
+
           'Enclusia Cloud Platform access request submitted successfully!'
+
         );
 
 
@@ -1444,7 +1517,9 @@ export class OGFSUserAccessFormComponent
          * after successful submission.
          */
         this.router.navigate([
+
           '/'
+
         ]);
 
       },
@@ -1456,8 +1531,11 @@ export class OGFSUserAccessFormComponent
       error: (error: any) => {
 
         console.error(
+
           'Enclusia Access Request Error:',
+
           error
+
         );
 
 
@@ -1471,8 +1549,11 @@ export class OGFSUserAccessFormComponent
         if (error?.error) {
 
           console.error(
+
             'Backend Response:',
+
             error.error
+
           );
 
         }
@@ -1484,20 +1565,25 @@ export class OGFSUserAccessFormComponent
         if (error?.error?.errors) {
 
           console.error(
+
             'Validation Errors:',
+
             error.error.errors
+
           );
 
         }
 
 
         let message =
+
           'Failed to submit the Enclusia access request. Please try again.';
 
 
         if (error?.error?.detail) {
 
           message =
+
             error.error.detail;
 
         }
@@ -1505,6 +1591,7 @@ export class OGFSUserAccessFormComponent
         else if (error?.error?.message) {
 
           message =
+
             error.error.message;
 
         }
@@ -1512,6 +1599,7 @@ export class OGFSUserAccessFormComponent
         else if (error?.error?.errors) {
 
           message =
+
             'Please correct the highlighted form information and try again.';
 
         }
@@ -1538,8 +1626,11 @@ export class OGFSUserAccessFormComponent
   ): boolean {
 
     const field =
+
       this.accessForm.get(
+
         `${groupName}.${fieldName}`
+
       );
 
 
@@ -1550,8 +1641,11 @@ export class OGFSUserAccessFormComponent
       field.invalid &&
 
       (
+
         field.dirty ||
+
         field.touched
+
       )
 
     );
@@ -1569,8 +1663,11 @@ export class OGFSUserAccessFormComponent
   ): boolean {
 
     const field =
+
       this.accessForm.get(
+
         fieldName
+
       );
 
 
@@ -1581,8 +1678,11 @@ export class OGFSUserAccessFormComponent
       field.invalid &&
 
       (
+
         field.dirty ||
+
         field.touched
+
       )
 
     );

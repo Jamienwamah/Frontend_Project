@@ -1,30 +1,10 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-  inject
-} from '@angular/core';
-
+import {environment} from '../../../../environments/environment.development';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
-
-import {
-  Router,
-  RouterLink
-} from '@angular/router';
-
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
 import { EntraService } from '../../../core/services/entra.service';
-
 
 export interface OgfsDeviceTroubleshootingPayload {
   currentDate: Date;
@@ -51,15 +31,6 @@ export interface OgfsDeviceTroubleshootingPayload {
     startDate: string;
     troubleshootingAttempted: boolean;
     attemptedDetails?: string;
-  };
-
-  consent: {
-    agreed: boolean;
-  };
-
-  signatures: {
-    employee: string;
-    employeeDate: string;
   };
 
   officialUse?: Record<string, any>;
@@ -780,180 +751,6 @@ export interface OgfsDeviceTroubleshootingPayload {
             </section>
 
 
-            <!-- SECTION 4: CONSENT & SIGNATURE -->
-            <section class="space-y-5">
-
-              <div
-                class="flex items-center gap-3 border-b border-slate-200 pb-3"
-              >
-
-                <div
-                  class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold"
-                >
-                  4
-                </div>
-
-
-                <div>
-
-                  <h2 class="text-lg font-bold text-slate-800">
-                    Consent & Authorization
-                  </h2>
-
-                  <p class="text-xs text-slate-500 mt-0.5">
-                    Confirm authorization for OGFS IT Support to diagnose and
-                    remediate the reported issue.
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <!-- CONSENT -->
-              <div
-                formGroupName="consent"
-                class="p-4 bg-blue-50/50 rounded-2xl border border-blue-100"
-              >
-
-                <div
-                  class="flex items-start gap-3"
-                >
-
-                  <input
-                    type="checkbox"
-                    id="ogfsConsent"
-                    formControlName="agreed"
-                    class="mt-1 w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                  />
-
-
-                  <label
-                    for="ogfsConsent"
-                    class="text-xs text-slate-700 leading-relaxed"
-                  >
-                    I authorize OGFS IT Support to perform diagnostic and
-                    remediation work on this equipment.
-                  </label>
-
-                </div>
-
-
-                <span
-                  *ngIf="
-                    troubleshootingForm.get('consent.agreed')?.invalid &&
-                    troubleshootingForm.get('consent.agreed')?.touched
-                  "
-                  class="text-xs text-red-500 mt-2 block"
-                >
-                  Authorization is required before submitting the form.
-                </span>
-
-              </div>
-
-
-              <!-- SIGNATURE -->
-              <div
-                formGroupName="signatures"
-                class="grid grid-cols-1 sm:grid-cols-2 gap-5"
-              >
-
-                <!-- DIGITAL SIGNATURE -->
-                <div>
-
-                  <label
-                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-                  >
-                    Digital Signature *
-                  </label>
-
-
-                  <div
-                    class="border border-slate-200 rounded-xl bg-white overflow-hidden"
-                    [class.border-red-500]="
-                      isFieldInvalid('signatures', 'employee')
-                    "
-                  >
-
-                    <canvas
-                      #employeeSignatureCanvas
-                      width="700"
-                      height="180"
-                      class="w-full h-40 touch-none cursor-crosshair block"
-                      (pointerdown)="startDrawing($event)"
-                      (pointermove)="draw($event)"
-                      (pointerup)="stopDrawing()"
-                      (pointerleave)="stopDrawing()"
-                      (pointercancel)="stopDrawing()"
-                    ></canvas>
-
-
-                    <div
-                      class="flex items-center justify-between px-3 py-2 border-t border-slate-100 bg-slate-50"
-                    >
-
-                      <span class="text-xs text-slate-400">
-                        Draw your signature above
-                      </span>
-
-
-                      <button
-                        type="button"
-                        (click)="clearSignature()"
-                        class="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        Clear Signature
-                      </button>
-
-                    </div>
-
-                  </div>
-
-
-                  <span
-                    *ngIf="isFieldInvalid('signatures', 'employee')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Digital signature is required.
-                  </span>
-
-                </div>
-
-
-                <!-- SIGNATURE DATE -->
-                <div>
-
-                  <label
-                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-                  >
-                    Signature Date *
-                  </label>
-
-
-                  <input
-                    type="date"
-                    formControlName="employeeDate"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                    [class.border-red-500]="
-                      isFieldInvalid('signatures', 'employeeDate')
-                    "
-                  />
-
-
-                  <span
-                    *ngIf="isFieldInvalid('signatures', 'employeeDate')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Signature date is required.
-                  </span>
-
-                </div>
-
-              </div>
-
-            </section>
-
-
             <!-- SUBMIT BUTTON -->
             <div
               class="pt-6 border-t border-slate-200 flex justify-end"
@@ -977,7 +774,7 @@ export interface OgfsDeviceTroubleshootingPayload {
     </div>
   `
 })
-export class OGFSTroubleshooting implements OnInit, AfterViewInit {
+export class OGFSTroubleshooting implements OnInit {
 
   private fb = inject(FormBuilder);
 
@@ -991,13 +788,6 @@ export class OGFSTroubleshooting implements OnInit, AfterViewInit {
   troubleshootingForm!: FormGroup;
 
   currentDate: Date = new Date();
-
-
-  @ViewChild('employeeSignatureCanvas')
-  employeeSignatureCanvas!: ElementRef<HTMLCanvasElement>;
-
-
-  private isDrawingEmployee = false;
 
 
   ngOnInit(): void {
@@ -1109,40 +899,6 @@ export class OGFSTroubleshooting implements OnInit, AfterViewInit {
           ''
         ]
 
-      }),
-
-
-      /*
-       * CONSENT
-       */
-      consent: this.fb.group({
-
-        agreed: [
-          false,
-          Validators.requiredTrue
-        ]
-
-      }),
-
-
-      /*
-       * SIGNATURE
-       */
-      signatures: this.fb.group({
-
-        employee: [
-          '',
-          Validators.required
-        ],
-
-        employeeDate: [
-          new Date()
-            .toISOString()
-            .substring(0, 10),
-
-          Validators.required
-        ]
-
       })
 
     });
@@ -1153,246 +909,6 @@ export class OGFSTroubleshooting implements OnInit, AfterViewInit {
      * Microsoft Entra information.
      */
     this.loadEmployeeInformation();
-
-  }
-
-
-  /*
-   * INITIALIZE SIGNATURE CANVAS
-   */
-  ngAfterViewInit(): void {
-
-    this.setupCanvas(
-      this.employeeSignatureCanvas.nativeElement
-    );
-
-  }
-
-
-  /*
-   * CONFIGURE SIGNATURE CANVAS
-   */
-  private setupCanvas(
-    canvas: HTMLCanvasElement
-  ): void {
-
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-    context.lineWidth = 2;
-
-    context.lineCap = 'round';
-
-    context.lineJoin = 'round';
-
-    context.strokeStyle = '#0f172a';
-
-  }
-
-
-  /*
-   * START DRAWING SIGNATURE
-   */
-  public startDrawing(
-    event: PointerEvent
-  ): void {
-
-    const canvas =
-      this.employeeSignatureCanvas.nativeElement;
-
-    const context =
-      canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-
-    this.isDrawingEmployee = true;
-
-
-    canvas.setPointerCapture(
-      event.pointerId
-    );
-
-
-    const position =
-      this.getCanvasPosition(
-        event,
-        canvas
-      );
-
-
-    context.beginPath();
-
-    context.moveTo(
-      position.x,
-      position.y
-    );
-
-  }
-
-
-  /*
-   * DRAW SIGNATURE
-   */
-  public draw(
-    event: PointerEvent
-  ): void {
-
-    if (!this.isDrawingEmployee) {
-      return;
-    }
-
-
-    const canvas =
-      this.employeeSignatureCanvas.nativeElement;
-
-    const context =
-      canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-
-    const position =
-      this.getCanvasPosition(
-        event,
-        canvas
-      );
-
-
-    context.lineTo(
-      position.x,
-      position.y
-    );
-
-    context.stroke();
-
-
-    this.updateSignatureValue();
-
-  }
-
-
-  /*
-   * STOP DRAWING
-   */
-  public stopDrawing(): void {
-
-    this.isDrawingEmployee = false;
-
-    this.updateSignatureValue();
-
-  }
-
-
-  /*
-   * GET POINTER POSITION ON CANVAS
-   */
-  private getCanvasPosition(
-    event: PointerEvent,
-    canvas: HTMLCanvasElement
-  ): {
-    x: number;
-    y: number;
-  } {
-
-    const rect =
-      canvas.getBoundingClientRect();
-
-
-    return {
-
-      x:
-        (event.clientX - rect.left) *
-        (canvas.width / rect.width),
-
-      y:
-        (event.clientY - rect.top) *
-        (canvas.height / rect.height)
-
-    };
-
-  }
-
-
-  /*
-   * SAVE SIGNATURE INTO FORM CONTROL
-   *
-   * The canvas is converted to a PNG
-   * data URL and stored in:
-   *
-   * signatures.employee
-   */
-  private updateSignatureValue(): void {
-
-    const canvas =
-      this.employeeSignatureCanvas.nativeElement;
-
-
-    const signature =
-      canvas.toDataURL('image/png');
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.setValue(signature);
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.markAsTouched();
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.updateValueAndValidity();
-
-  }
-
-
-  /*
-   * CLEAR SIGNATURE
-   */
-  public clearSignature(): void {
-
-    const canvas =
-      this.employeeSignatureCanvas.nativeElement;
-
-    const context =
-      canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-
-    context.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.setValue('');
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.markAsTouched();
-
-
-    this.troubleshootingForm
-      .get('signatures.employee')
-      ?.updateValueAndValidity();
 
   }
 
@@ -1476,8 +992,7 @@ export class OGFSTroubleshooting implements OnInit, AfterViewInit {
 
       this.http.post(
 
-        'http://localhost:8000/api/v1/ogfs/troubleshoot/',
-
+        `${environment.apiBaseUrl}/api/v1/ogfs/troubleshoot/`,
         payload,
 
         {

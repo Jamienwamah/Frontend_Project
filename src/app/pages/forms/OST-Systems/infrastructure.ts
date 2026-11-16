@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment.development';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -390,7 +391,7 @@ export class ItInfrastructureReceiptFormComponent implements OnInit {
       console.log('Infrastructure Receipt Payload:', payload);
 
       this.http.post(
-        'http://127.0.0.1:8000/api/v1/ost-systems/infrastructure/',
+        `${environment.apiBaseUrl}/api/v1/infrastructure/`,
         payload
       ).subscribe({
         next: (response) => {

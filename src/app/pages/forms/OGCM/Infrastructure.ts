@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment.development';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -527,7 +528,7 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
       );
 
       this.http.post(
-        'http://localhost:8000/api/v1/ogcm/infrastructure/',
+       `${environment.apiBaseUrl}/api/v1/infrastructure/`,
         payload,
         {
           withCredentials: true

@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment.development';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -13,13 +14,9 @@ import {
   RouterLink
 } from '@angular/router';
 
-import {
-  HttpClient
-} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {
-  EntraService
-} from '../../../core/services/entra.service';
+import { EntraService } from '../../../core/services/entra.service';
 
 
 /**
@@ -27,75 +24,42 @@ import {
  * is being created for.
  */
 export interface AccessForUser {
-
   name: string;
-
   email: string;
-
 }
 
 
 /**
  * Enclusia Cloud Platform access request payload.
  *
- * This structure must match the Django
- * serializer/backend.
+ * Ensure the Django serializer supports
+ * these updated fields.
  */
 export interface EnclusiaAccessPayload {
 
   currentDate: Date;
 
-  /**
-   * Person creating the request.
-   */
   requester: {
-
     name: string;
-
   };
 
-  /**
-   * Person the access is being created for.
-   */
   accessFor: {
-
     name: string;
-
     email: string;
-
   };
 
-  /**
-   * Employee information of the
-   * person creating the request.
-   */
   employee: {
-
     name: string;
-
     department: string;
-
     jobTitle: string;
-
     employeeId: string;
-
   };
 
-  /**
-   * Enclusia access being requested.
-   */
   enclusiaAccess: {
-
-    role: string;
-
-    rolecode: string;
-
-    roleDescription: string;
-
-    reason: string;
-
+    // expirationType: string;
+    accessRequired: string;
+    justification: string;
   };
-
 }
 
 
@@ -106,13 +70,9 @@ export interface EnclusiaAccessPayload {
   standalone: true,
 
   imports: [
-
     CommonModule,
-
     ReactiveFormsModule,
-
     RouterLink
-
   ],
 
   template: `
@@ -154,7 +114,6 @@ export interface EnclusiaAccessPayload {
 
           </a>
 
-
           <span
             class="text-xs text-slate-400 font-mono"
           >
@@ -190,7 +149,6 @@ export interface EnclusiaAccessPayload {
 
                 </div>
 
-
                 <h1
                   class="text-2xl sm:text-3xl font-extrabold tracking-tight"
                 >
@@ -198,7 +156,6 @@ export interface EnclusiaAccessPayload {
                   Platform Access Request
 
                 </h1>
-
 
                 <p
                   class="text-blue-100 text-sm mt-2 leading-relaxed"
@@ -209,7 +166,6 @@ export interface EnclusiaAccessPayload {
                 </p>
 
               </div>
-
 
               <div
                 class="text-left sm:text-right text-xs text-blue-200"
@@ -258,7 +214,6 @@ export interface EnclusiaAccessPayload {
 
                 </div>
 
-
                 <div>
 
                   <h2
@@ -268,7 +223,6 @@ export interface EnclusiaAccessPayload {
                     Access Request Information
 
                   </h2>
-
 
                   <p
                     class="text-xs text-slate-500 mt-0.5"
@@ -298,7 +252,6 @@ export interface EnclusiaAccessPayload {
 
                   </label>
 
-
                   <input
                     type="text"
                     formControlName="accessForName"
@@ -307,7 +260,6 @@ export interface EnclusiaAccessPayload {
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
                     [class.border-red-500]="isFieldInvalid('accessForName')"
                   />
-
 
                   <span
                     *ngIf="isFieldInvalid('accessForName')"
@@ -332,7 +284,6 @@ export interface EnclusiaAccessPayload {
 
                   </label>
 
-
                   <input
                     type="email"
                     formControlName="accessForEmail"
@@ -341,7 +292,6 @@ export interface EnclusiaAccessPayload {
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
                     [class.border-red-500]="isFieldInvalid('accessForEmail')"
                   />
-
 
                   <span
                     *ngIf="isFieldInvalid('accessForEmail')"
@@ -356,7 +306,6 @@ export interface EnclusiaAccessPayload {
 
                     </ng-container>
 
-
                     <ng-container
                       *ngIf="accessForm.get('accessForEmail')?.hasError('email')"
                     >
@@ -364,7 +313,6 @@ export interface EnclusiaAccessPayload {
                       Please enter a valid email address.
 
                     </ng-container>
-
 
                     <ng-container
                       *ngIf="accessForm.get('accessForEmail')?.hasError('optimumEmail')"
@@ -396,7 +344,6 @@ export interface EnclusiaAccessPayload {
 
                   </div>
 
-
                   <div>
 
                     <h3
@@ -406,7 +353,6 @@ export interface EnclusiaAccessPayload {
                       Corporate Account Required
 
                     </h3>
-
 
                     <p
                       class="text-xs text-slate-500 mt-1 leading-relaxed"
@@ -443,7 +389,6 @@ export interface EnclusiaAccessPayload {
 
                 </div>
 
-
                 <div>
 
                   <h2
@@ -453,7 +398,6 @@ export interface EnclusiaAccessPayload {
                     Employee Information
 
                   </h2>
-
 
                   <p
                     class="text-xs text-slate-500 mt-0.5"
@@ -483,7 +427,6 @@ export interface EnclusiaAccessPayload {
 
                   </label>
 
-
                   <input
                     type="text"
                     formControlName="name"
@@ -504,7 +447,6 @@ export interface EnclusiaAccessPayload {
                     Department
 
                   </label>
-
 
                   <input
                     type="text"
@@ -527,7 +469,6 @@ export interface EnclusiaAccessPayload {
 
                   </label>
 
-
                   <input
                     type="text"
                     formControlName="jobTitle"
@@ -549,7 +490,6 @@ export interface EnclusiaAccessPayload {
 
                   </label>
 
-
                   <input
                     type="text"
                     formControlName="employeeId"
@@ -557,7 +497,6 @@ export interface EnclusiaAccessPayload {
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
                     [class.border-red-500]="isGroupFieldInvalid('employee', 'employeeId')"
                   />
-
 
                   <span
                     *ngIf="isGroupFieldInvalid('employee', 'employeeId')"
@@ -593,7 +532,6 @@ export interface EnclusiaAccessPayload {
 
                 </div>
 
-
                 <div>
 
                   <h2
@@ -604,12 +542,11 @@ export interface EnclusiaAccessPayload {
 
                   </h2>
 
-
                   <p
                     class="text-xs text-slate-500 mt-0.5"
                   >
 
-                    Specify the Enclusia platform access required for the user.
+                    Specify the type and scope of Enclusia platform access required for the user.
 
                   </p>
 
@@ -617,190 +554,78 @@ export interface EnclusiaAccessPayload {
 
               </div>
 
-
-              <div
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-              >
-
-                <!-- ROLECODE -->
-                <div>
-
-                  <label
-                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-                  >
-
-                    Rolecode *
-
-                  </label>
-
-
-                  <select
-                    formControlName="rolecode"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'rolecode')"
-                  >
-
-                    <option value="">
-
-                      Select Role Code
-
-                    </option>
-
-
-                    @for (rolecode of rolecodes; track rolecode) {
-
-                      <option [value]="rolecode">
-
-                        {{ rolecode }}
-
-                      </option>
-
-                    }
-
-                  </select>
-
-
-                  <span
-                    *ngIf="isGroupFieldInvalid('enclusiaAccess', 'rolecode')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-
-                    Please select a role code.
-
-                  </span>
-
-                </div>
-
-
-                <!-- ENCLUSIA ROLE -->
-                <div>
-
-                  <label
-                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-                  >
-
-                    Enclusia Role *
-
-                  </label>
-
-
-                  <select
-                    formControlName="role"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'role')"
-                  >
-
-                    <option value="">
-
-                      Select Enclusia Role
-
-                    </option>
-
-
-                    @for (role of enclusiaRoles; track role) {
-
-                      <option [value]="role">
-
-                        {{ role }}
-
-                      </option>
-
-                    }
-
-                  </select>
-
-
-                  <span
-                    *ngIf="isGroupFieldInvalid('enclusiaAccess', 'role')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-
-                    Please select an Enclusia role.
-
-                  </span>
-
-                </div>
-
-
-                <!-- ROLE DESCRIPTION -->
-                <div>
-
-                  <label
-                    class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-                  >
-
-                    Role Description *
-
-                  </label>
-
-
-                  <select
-                    formControlName="roleDescription"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'roleDescription')"
-                  >
-
-                    <option value="">
-
-                      Select Role Description
-
-                    </option>
-
-
-                    @for (description of roleDescriptions; track description) {
-
-                      <option [value]="description">
-
-                        {{ description }}
-
-                      </option>
-
-                    }
-
-                  </select>
-
-
-                  <span
-                    *ngIf="isGroupFieldInvalid('enclusiaAccess', 'roleDescription')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-
-                    Please select a role description.
-
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <!-- REASON FOR ACCESS -->
+              <!-- ACCESS REQUIRED -->
               <div>
 
                 <label
                   class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
                 >
 
-                  Business Justification *
+                  Access Required *
 
                 </label>
 
+                <select
+                  formControlName="accessRequired"
+                  class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
+                  [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'accessRequired')"
+                >
 
-                <textarea
-                  formControlName="reason"
-                  rows="4"
-                  placeholder="Explain why access to the Enclusia Cloud Platform is required..."
-                  class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                  [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'reason')"
-                ></textarea>
+                  <option value="">
 
+                    Select Required Access
+
+                  </option>
+
+                  @for (access of accessRequirements; track access) {
+
+                    <option [value]="access">
+
+                      {{ access }}
+
+                    </option>
+
+                  }
+
+                </select>
 
                 <span
-                  *ngIf="isGroupFieldInvalid('enclusiaAccess', 'reason')"
+                  *ngIf="isGroupFieldInvalid('enclusiaAccess', 'accessRequired')"
                   class="text-xs text-red-500 mt-1 block"
                 >
 
-                  Business justification is required.
+                  Please select the access required.
+
+                </span>
+
+              </div>
+
+
+              <!-- BUSINESS JUSTIFICATION -->
+              <div>
+
+                <label
+                  class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
+                >
+
+                  Justification *
+
+                </label>
+
+                <textarea
+                  formControlName="justification"
+                  rows="4"
+                  placeholder="Provide justification for the requested Enclusia Cloud Platform access..."
+                  class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
+                  [class.border-red-500]="isGroupFieldInvalid('enclusiaAccess', 'justification')"
+                ></textarea>
+
+                <span
+                  *ngIf="isGroupFieldInvalid('enclusiaAccess', 'justification')"
+                  class="text-xs text-red-500 mt-1 block"
+                >
+
+                  Please provide a justification for the requested access.
 
                 </span>
 
@@ -824,7 +649,6 @@ export interface EnclusiaAccessPayload {
 
                 </div>
 
-
                 <div>
 
                   <h3
@@ -835,12 +659,11 @@ export interface EnclusiaAccessPayload {
 
                   </h3>
 
-
                   <p
                     class="text-xs text-slate-500 mt-1 leading-relaxed"
                   >
 
-                    Access to the Enclusia Cloud Platform should be limited to the permissions required for the employee's assigned responsibilities.
+                    Access to the Enclusia Cloud Platform should be limited to the permissions required for the employee's assigned responsibilities. Temporary access requests should only be granted for the required period, while permanent access should be based on ongoing business requirements.
 
                   </p>
 
@@ -868,7 +691,6 @@ export interface EnclusiaAccessPayload {
 
                 </span>
 
-
                 <span *ngIf="isSubmitting">
 
                   Submitting...
@@ -878,7 +700,6 @@ export interface EnclusiaAccessPayload {
               </button>
 
             </div>
-
 
           </form>
 
@@ -893,9 +714,7 @@ export interface EnclusiaAccessPayload {
 })
 
 
-export class UserAccessFormComponent
-  implements OnInit {
-
+export class UserAccessFormComponent implements OnInit {
 
   private fb = inject(FormBuilder);
 
@@ -926,97 +745,29 @@ export class UserAccessFormComponent
 
 
   /**
-   * Enclusia Cloud Platform role codes.
+   * Enclusia Cloud Platform access options.
    */
-  readonly rolecodes: string[] = [
+  readonly accessRequirements: string[] = [
 
-    'ADM',
+    'Customer Account',
+    
+    'Transaction Management',
 
-    'AO',
+    'Customer Investment Management',
 
-    'FIN_DASH',
+    'Portfolio Management',
 
-    'FINCON',
+    'Treasury',
 
-    'GLOBAL_DASH',
+    'Treasury Setup',
 
-    'INT_CTRL',
+    'Investment Module Setup',
 
-    'INV_SETUP',
+    'Financial Accounting',
 
-    'IT_SUP',
+    'Financial Accounting Setup',
 
-    'OPS',
-
-    'OPS_DASH',
-
-    'SM',
-
-    'TR_OPS'
-
-  ];
-
-
-  /**
-   * Enclusia Cloud Platform roles.
-   */
-  readonly enclusiaRoles: string[] = [
-
-    'Administrator',
-
-    'Account Officers',
-
-    'Finance Dashboard',
-
-    'Financial Control',
-
-    'Global Dashboard',
-
-    'Internal Control',
-
-    'INVESTMENT MODULE SETUP',
-
-    'IT Support',
-
-    'Operations',
-
-    'OPERATIONS DASHBOARD',
-
-    'Support Manager',
-
-    'TREASURY OPERATIONS'
-
-  ];
-
-
-  /**
-   * Enclusia role descriptions.
-   */
-  readonly roleDescriptions: string[] = [
-
-    'Administrator Role',
-
-    'Account Officers',
-
-    'Finance Dashboard',
-
-    'Financial Control',
-
-    'Global Dashboard',
-
-    'Internal Control',
-
-    'INVESTMENT MODULE SETUP',
-
-    'IT Support',
-
-    'Operations',
-
-    'OPERATIONS DASHBOARD',
-
-    'Support Manager',
-
-    'TREASURY OPERATIONS'
+    'System Administration'
 
   ];
 
@@ -1077,7 +828,6 @@ export class UserAccessFormComponent
 
         ],
 
-
         department: [
 
           {
@@ -1089,7 +839,6 @@ export class UserAccessFormComponent
 
         ],
 
-
         jobTitle: [
 
           {
@@ -1100,7 +849,6 @@ export class UserAccessFormComponent
           Validators.required
 
         ],
-
 
         employeeId: [
 
@@ -1118,7 +866,22 @@ export class UserAccessFormComponent
        */
       enclusiaAccess: this.fb.group({
 
-        role: [
+        /**
+         * Temporary or permanent access request.
+         */
+        // expirationType: [
+
+        //   '',
+
+        //   Validators.required
+
+        // ],
+
+
+        /**
+         * Enclusia module or access area required.
+         */
+        accessRequired: [
 
           '',
 
@@ -1127,25 +890,10 @@ export class UserAccessFormComponent
         ],
 
 
-        rolecode: [
-
-          '',
-
-          Validators.required
-
-        ],
-
-
-        roleDescription: [
-
-          '',
-
-          Validators.required
-
-        ],
-
-
-        reason: [
+        /**
+         * Business justification for the access.
+         */
+        justification: [
 
           '',
 
@@ -1309,7 +1057,7 @@ export class UserAccessFormComponent
 
     /**
      * Build the exact payload expected
-     * by the Django serializer.
+     * by the updated Django serializer.
      */
     const payload: EnclusiaAccessPayload = {
 
@@ -1363,18 +1111,15 @@ export class UserAccessFormComponent
 
       enclusiaAccess: {
 
-        role:
-          formValue.enclusiaAccess.role,
+        // expirationType:
+        //   formValue.enclusiaAccess.expirationType,
 
-        rolecode:
-          formValue.enclusiaAccess.rolecode,
+        accessRequired:
+          formValue.enclusiaAccess.accessRequired,
 
-        roleDescription:
-          formValue.enclusiaAccess.roleDescription,
-
-        reason:
+        justification:
           String(
-            formValue.enclusiaAccess.reason || ''
+            formValue.enclusiaAccess.justification || ''
           ).trim()
 
       }
@@ -1401,7 +1146,7 @@ export class UserAccessFormComponent
      */
     this.http.post(
 
-      'http://localhost:8000/api/v1/enclusia/user/',
+      `${environment.apiBaseUrl}/api/v1/enclusia/user/`,
 
       payload,
 

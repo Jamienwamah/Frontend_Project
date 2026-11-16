@@ -1,24 +1,25 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
 
-export interface LaptopAcquisitionConsentPayload {
-  currentDate: Date;
+import { environment } from '../../../../environments/environment.development';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { EntraService } from '../../../core/services/entra.service';
+
+export interface LaptopAcquisitionPayload {
+  currentDate: string;
 
   employee: {
     name: string;
     department: string;
     jobTitle: string;
     employeeId: string;
-  };
-
-  acknowledgment: {
-    employeeSignature: string;
-    date: string;
-    authorizedRepresentativeSignature: string;
-    representativeName: string;
-    representativeTitle: string;
   };
 
   officialUse: {
@@ -31,7 +32,7 @@ export interface LaptopAcquisitionConsentPayload {
 }
 
 @Component({
-  selector: 'app-ogcm-laptop-acquisition',
+  selector: 'app-ost-laptop-acquisition',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
@@ -49,7 +50,7 @@ export interface LaptopAcquisitionConsentPayload {
           </a>
 
           <span class="text-xs text-slate-400 font-mono">
-            Form Ref: OGCM-LAPTOP-ACQ-2026
+            Form Ref: OST-LAPTOP-ACQ-2026
           </span>
         </header>
 
@@ -62,15 +63,15 @@ export interface LaptopAcquisitionConsentPayload {
 
               <div>
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-blue-800/80 text-blue-100 text-xs font-semibold mb-3">
-                  Hardware Acquisition
+                  OST Hardware Acquisition
                 </div>
 
                 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                  Laptop Acquisition Consent Form
+                  OST Laptop Acquisition Form
                 </h1>
 
                 <p class="text-blue-100 text-sm mt-2 leading-relaxed">
-                  Employee consent and acknowledgment for the acquisition and use of a company-provided laptop.
+                  Record employee information and details of the company laptop issued.
                 </p>
               </div>
 
@@ -103,74 +104,83 @@ export interface LaptopAcquisitionConsentPayload {
                   </h2>
 
                   <p class="text-xs text-slate-500 mt-0.5">
-                    Provide the details of the employee receiving the company laptop.
+                    Employee details are retrieved automatically from your signed-in account.
                   </p>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
+                <!-- EMPLOYEE NAME -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Full Name *
+                    Full Name
                   </label>
 
-                  <input type="text" formControlName="name" placeholder="John Doe"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('employee', 'name')" />
-
-                  <span *ngIf="isFieldInvalid('employee', 'name')" class="text-xs text-red-500 mt-1 block">
-                    Name is required.
-                  </span>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    placeholder="Retrieving your name..."
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-slate-50 focus:outline-none"
+                  />
                 </div>
 
+                <!-- EMPLOYEE ID -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Employee ID *
                   </label>
 
-                  <input type="text" formControlName="employeeId" placeholder="EMP-10492"
+                  <input
+                    type="text"
+                    formControlName="employeeId"
+                    placeholder="Enter your Employee ID"
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('employee', 'employeeId')" />
+                    [class.border-red-500]="isFieldInvalid('employee', 'employeeId')"
+                  />
 
-                  <span *ngIf="isFieldInvalid('employee', 'employeeId')" class="text-xs text-red-500 mt-1 block">
+                  <span
+                    *ngIf="isFieldInvalid('employee', 'employeeId')"
+                    class="text-xs text-red-500 mt-1 block"
+                  >
                     Employee ID is required.
                   </span>
                 </div>
 
+                <!-- DEPARTMENT -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Department *
+                    Department
                   </label>
 
-                  <input type="text" formControlName="department" placeholder="Finance / IT / Operations"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('employee', 'department')" />
-
-                  <span *ngIf="isFieldInvalid('employee', 'department')" class="text-xs text-red-500 mt-1 block">
-                    Department is required.
-                  </span>
+                  <input
+                    type="text"
+                    formControlName="department"
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 focus:outline-none"
+                  />
                 </div>
 
+                <!-- JOB TITLE -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Job Title *
+                    Job Title
                   </label>
 
-                  <input type="text" formControlName="jobTitle" placeholder="IT Specialist"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('employee', 'jobTitle')" />
-
-                  <span *ngIf="isFieldInvalid('employee', 'jobTitle')" class="text-xs text-red-500 mt-1 block">
-                    Job Title is required.
-                  </span>
+                  <input
+                    type="text"
+                    formControlName="jobTitle"
+                    readonly
+                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-slate-50 focus:outline-none"
+                  />
                 </div>
 
               </div>
             </section>
 
-            <!-- SECTION 2: CONSENT AND ACKNOWLEDGMENT -->
-            <section class="space-y-5">
+            <!-- SECTION 2: LAPTOP INFORMATION -->
+            <section formGroupName="officialUse" class="space-y-5">
 
               <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
                 <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
@@ -179,269 +189,18 @@ export interface LaptopAcquisitionConsentPayload {
 
                 <div>
                   <h2 class="text-lg font-bold text-slate-800">
-                    Consent & Acknowledgment
+                    Laptop Information
                   </h2>
 
                   <p class="text-xs text-slate-500 mt-0.5">
-                    Confirm receipt, responsibility, and acceptable use of the company laptop.
-                  </p>
-                </div>
-              </div>
-
-              <div class="p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
-
-                <p class="text-sm text-slate-700 leading-relaxed mb-4">
-                  I acknowledge that the laptop issued to me is the property of the company
-                  and is provided for authorized business purposes. I agree to take reasonable
-                  care of the equipment and comply with the company's IT, information security,
-                  acceptable use, and asset management policies.
-                </p>
-
-                <div class="space-y-3 text-xs text-slate-700 leading-relaxed">
-
-                  <div class="flex items-start gap-3">
-                    <span class="font-bold text-blue-600">1.</span>
-                    <p>
-                      I will use the laptop primarily for authorized company business and will
-                      follow all applicable company IT and security policies.
-                    </p>
-                  </div>
-
-                  <div class="flex items-start gap-3">
-                    <span class="font-bold text-blue-600">2.</span>
-                    <p>
-                      I will take reasonable precautions to prevent loss, theft, damage,
-                      unauthorized access, or misuse of the laptop.
-                    </p>
-                  </div>
-
-                  <div class="flex items-start gap-3">
-                    <span class="font-bold text-blue-600">3.</span>
-                    <p>
-                      I will promptly report any loss, theft, damage, malfunction, or security
-                      incident involving the laptop to the IT Team.
-                    </p>
-                  </div>
-
-                  <div class="flex items-start gap-3">
-                    <span class="font-bold text-blue-600">4.</span>
-                    <p>
-                      I understand that the laptop remains company property and may be recalled,
-                      inspected, repaired, replaced, or reassigned when required.
-                    </p>
-                  </div>
-
-                  <div class="flex items-start gap-3">
-                    <span class="font-bold text-blue-600">5.</span>
-                    <p>
-                      I agree to return the laptop and all issued accessories when requested,
-                      upon replacement, transfer, or separation from the company.
-                    </p>
-                  </div>
-
-                </div>
-
-              </div>
-            </section>
-
-            <!-- SECTION 3: EMPLOYEE ACKNOWLEDGMENT -->
-            <section formGroupName="acknowledgment" class="space-y-5">
-
-              <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
-                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  3
-                </div>
-
-                <div>
-                  <h2 class="text-lg font-bold text-slate-800">
-                    Employee Acknowledgment
-                  </h2>
-
-                  <p class="text-xs text-slate-500 mt-0.5">
-                    Sign to confirm acceptance of the laptop and the stated responsibilities.
+                    Record the laptop and accessories issued to the OST employee.
                   </p>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-                <!-- EMPLOYEE SIGNATURE -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Employee Signature *
-                  </label>
-
-                  <div class="border border-slate-200 rounded-xl bg-white overflow-hidden"
-                    [class.border-red-500]="isFieldInvalid('acknowledgment', 'employeeSignature')">
-
-                    <canvas
-                      #employeeSignatureCanvas
-                      width="700"
-                      height="180"
-                      class="w-full h-40 touch-none cursor-crosshair block"
-                      (pointerdown)="startDrawing($event, 'employee')"
-                      (pointermove)="draw($event, 'employee')"
-                      (pointerup)="stopDrawing('employee')"
-                      (pointerleave)="stopDrawing('employee')"
-                      (pointercancel)="stopDrawing('employee')"
-                    ></canvas>
-
-                    <div class="flex items-center justify-between px-3 py-2 border-t border-slate-100 bg-slate-50">
-                      <span class="text-xs text-slate-400">
-                        Draw your signature above
-                      </span>
-
-                      <button
-                        type="button"
-                        (click)="clearSignature('employee')"
-                        class="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        Clear Signature
-                      </button>
-                    </div>
-                  </div>
-
-                  <span
-                    *ngIf="isFieldInvalid('acknowledgment', 'employeeSignature')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Employee signature is required.
-                  </span>
-                </div>
-
-                <!-- SIGNATURE DATE -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Date *
-                  </label>
-
-                  <input
-                    type="date"
-                    formControlName="date"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('acknowledgment', 'date')"
-                  />
-
-                  <span
-                    *ngIf="isFieldInvalid('acknowledgment', 'date')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Date is required.
-                  </span>
-                </div>
-
-                <!-- REPRESENTATIVE NAME -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Authorized Representative Name *
-                  </label>
-
-                  <input
-                    type="text"
-                    formControlName="representativeName"
-                    placeholder="Representative full name"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('acknowledgment', 'representativeName')"
-                  />
-
-                  <span
-                    *ngIf="isFieldInvalid('acknowledgment', 'representativeName')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Representative name is required.
-                  </span>
-                </div>
-
-                <!-- REPRESENTATIVE TITLE -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Representative Title *
-                  </label>
-
-                  <input
-                    type="text"
-                    formControlName="representativeTitle"
-                    placeholder="IT Manager / Authorized Representative"
-                    class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
-                    [class.border-red-500]="isFieldInvalid('acknowledgment', 'representativeTitle')"
-                  />
-
-                  <span
-                    *ngIf="isFieldInvalid('acknowledgment', 'representativeTitle')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Representative title is required.
-                  </span>
-                </div>
-
-                <!-- AUTHORIZED REPRESENTATIVE SIGNATURE -->
-                <div>
-                  <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                    Authorized Representative Signature *
-                  </label>
-
-                  <div class="border border-slate-200 rounded-xl bg-white overflow-hidden"
-                    [class.border-red-500]="isFieldInvalid('acknowledgment', 'authorizedRepresentativeSignature')">
-
-                    <canvas
-                      #representativeSignatureCanvas
-                      width="700"
-                      height="180"
-                      class="w-full h-40 touch-none cursor-crosshair block"
-                      (pointerdown)="startDrawing($event, 'representative')"
-                      (pointermove)="draw($event, 'representative')"
-                      (pointerup)="stopDrawing('representative')"
-                      (pointerleave)="stopDrawing('representative')"
-                      (pointercancel)="stopDrawing('representative')"
-                    ></canvas>
-
-                    <div class="flex items-center justify-between px-3 py-2 border-t border-slate-100 bg-slate-50">
-                      <span class="text-xs text-slate-400">
-                        Draw your signature above
-                      </span>
-
-                      <button
-                        type="button"
-                        (click)="clearSignature('representative')"
-                        class="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        Clear Signature
-                      </button>
-                    </div>
-                  </div>
-
-                  <span
-                    *ngIf="isFieldInvalid('acknowledgment', 'authorizedRepresentativeSignature')"
-                    class="text-xs text-red-500 mt-1 block"
-                  >
-                    Representative signature is required.
-                  </span>
-                </div>
-
-              </div>
-            </section>
-
-            <!-- SECTION 4: OFFICIAL USE -->
-            <section formGroupName="officialUse" class="space-y-5">
-
-              <div class="flex items-center gap-3 border-b border-slate-200 pb-3">
-                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-                  4
-                </div>
-
-                <div>
-                  <h2 class="text-lg font-bold text-slate-800">
-                    For Official Use Only
-                  </h2>
-
-                  <p class="text-xs text-slate-500 mt-0.5">
-                    Record the laptop and accessories issued to the employee.
-                  </p>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
+                <!-- LAPTOP DETAILS -->
                 <div class="sm:col-span-2">
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Laptop Details *
@@ -463,6 +222,7 @@ export interface LaptopAcquisitionConsentPayload {
                   </span>
                 </div>
 
+                <!-- BRAND AND MODEL -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Brand & Model *
@@ -484,6 +244,7 @@ export interface LaptopAcquisitionConsentPayload {
                   </span>
                 </div>
 
+                <!-- SERIAL NUMBER -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Serial Number *
@@ -492,7 +253,7 @@ export interface LaptopAcquisitionConsentPayload {
                   <input
                     type="text"
                     formControlName="serialNumber"
-                    placeholder="SN-982312A"
+                    placeholder="Enter laptop serial number"
                     class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all"
                     [class.border-red-500]="isFieldInvalid('officialUse', 'serialNumber')"
                   />
@@ -505,6 +266,7 @@ export interface LaptopAcquisitionConsentPayload {
                   </span>
                 </div>
 
+                <!-- ACCESSORIES -->
                 <div class="sm:col-span-2">
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Accessories Provided *
@@ -526,6 +288,7 @@ export interface LaptopAcquisitionConsentPayload {
                   </span>
                 </div>
 
+                <!-- DATE ISSUED -->
                 <div>
                   <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
                     Date Issued *
@@ -554,9 +317,16 @@ export interface LaptopAcquisitionConsentPayload {
 
               <button
                 type="submit"
-                class="px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-xl shadow-md transition-all"
+                [disabled]="isSubmitting || isLoadingProfile"
+                class="px-8 py-3 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium rounded-xl shadow-md transition-all"
               >
-                Submit Laptop Request Form For OST 
+                {{
+                  isLoadingProfile
+                    ? 'Loading Employee Information...'
+                    : isSubmitting
+                      ? 'Submitting...'
+                      : 'Submit OST Laptop Acquisition Form'
+                }}
               </button>
 
             </div>
@@ -567,34 +337,28 @@ export interface LaptopAcquisitionConsentPayload {
     </div>
   `
 })
-export class OSTLaptopAcquisitionConsentComponent implements OnInit, AfterViewInit {
+export class OSTLaptopAcquisitionConsentComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private entraService = inject(EntraService);
+  private http = inject(HttpClient);
 
-  @ViewChild('employeeSignatureCanvas') employeeSignatureCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('representativeSignatureCanvas') representativeSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  private readonly apiUrl =
+    `${environment.apiBaseUrl}/api/v1/issue/`;
 
   consentForm!: FormGroup;
   currentDate: Date = new Date();
 
-  private isDrawingEmployee = false;
-  private isDrawingRepresentative = false;
+  isSubmitting = false;
+  isLoadingProfile = true;
 
   ngOnInit(): void {
     this.consentForm = this.fb.group({
       employee: this.fb.group({
-        name: ['', Validators.required],
-        department: ['', Validators.required],
-        jobTitle: ['', Validators.required],
+        name: [{ value: '', disabled: true }, Validators.required],
+        department: [{ value: '', disabled: true }, Validators.required],
+        jobTitle: [{ value: '', disabled: true }, Validators.required],
         employeeId: ['', Validators.required]
-      }),
-
-      acknowledgment: this.fb.group({
-        employeeSignature: ['', Validators.required],
-        date: [new Date().toISOString().substring(0, 10), Validators.required],
-        authorizedRepresentativeSignature: ['', Validators.required],
-        representativeName: ['', Validators.required],
-        representativeTitle: ['', Validators.required]
       }),
 
       officialUse: this.fb.group({
@@ -602,160 +366,158 @@ export class OSTLaptopAcquisitionConsentComponent implements OnInit, AfterViewIn
         brandModel: ['', Validators.required],
         serialNumber: ['', Validators.required],
         accessoriesProvided: ['', Validators.required],
-        dateIssued: [new Date().toISOString().substring(0, 10), Validators.required]
+        dateIssued: [
+          new Date().toISOString().substring(0, 10),
+          Validators.required
+        ]
       })
+    });
+
+    this.loadEmployeeInformation();
+  }
+
+  private loadEmployeeInformation(): void {
+    this.isLoadingProfile = true;
+
+    this.entraService.getMyProfile().subscribe({
+      next: (response: any) => {
+        const profile = response.profile ?? response;
+
+        this.consentForm.get('employee')?.patchValue({
+          name: profile.name || '',
+          department: profile.department || '',
+          jobTitle: profile.jobTitle || profile.job_title || ''
+        });
+
+        this.isLoadingProfile = false;
+
+        if (
+          !profile.name ||
+          !profile.department ||
+          !(profile.jobTitle || profile.job_title)
+        ) {
+          console.warn(
+            'Some employee profile information is missing:',
+            profile
+          );
+        }
+      },
+
+      error: (error) => {
+        console.error(
+          'Unable to retrieve signed-in employee information:',
+          error
+        );
+
+        this.isLoadingProfile = false;
+
+        alert(
+          'Unable to retrieve your employee information. Please refresh the page or contact IT Support.'
+        );
+      }
     });
   }
 
-  ngAfterViewInit(): void {
-    this.setupCanvas(this.employeeSignatureCanvas.nativeElement);
-    this.setupCanvas(this.representativeSignatureCanvas.nativeElement);
-  }
-
-  private setupCanvas(canvas: HTMLCanvasElement): void {
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-    context.lineWidth = 2;
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.strokeStyle = '#0f172a';
-  }
-
-  public startDrawing(event: PointerEvent, type: 'employee' | 'representative'): void {
-    const canvas = type === 'employee'
-      ? this.employeeSignatureCanvas.nativeElement
-      : this.representativeSignatureCanvas.nativeElement;
-
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-    if (type === 'employee') {
-      this.isDrawingEmployee = true;
-    } else {
-      this.isDrawingRepresentative = true;
-    }
-
-    canvas.setPointerCapture(event.pointerId);
-
-    const position = this.getCanvasPosition(event, canvas);
-
-    context.beginPath();
-    context.moveTo(position.x, position.y);
-  }
-
-  public draw(event: PointerEvent, type: 'employee' | 'representative'): void {
-    const isDrawing = type === 'employee'
-      ? this.isDrawingEmployee
-      : this.isDrawingRepresentative;
-
-    if (!isDrawing) {
-      return;
-    }
-
-    const canvas = type === 'employee'
-      ? this.employeeSignatureCanvas.nativeElement
-      : this.representativeSignatureCanvas.nativeElement;
-
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-    const position = this.getCanvasPosition(event, canvas);
-
-    context.lineTo(position.x, position.y);
-    context.stroke();
-
-    this.updateSignatureValue(type);
-  }
-
-  public stopDrawing(type: 'employee' | 'representative'): void {
-    if (type === 'employee') {
-      this.isDrawingEmployee = false;
-    } else {
-      this.isDrawingRepresentative = false;
-    }
-
-    this.updateSignatureValue(type);
-  }
-
-  private getCanvasPosition(event: PointerEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
-    const rect = canvas.getBoundingClientRect();
-
-    return {
-      x: (event.clientX - rect.left) * (canvas.width / rect.width),
-      y: (event.clientY - rect.top) * (canvas.height / rect.height)
-    };
-  }
-
-  private updateSignatureValue(type: 'employee' | 'representative'): void {
-    const canvas = type === 'employee'
-      ? this.employeeSignatureCanvas.nativeElement
-      : this.representativeSignatureCanvas.nativeElement;
-
-    const signature = canvas.toDataURL('image/png');
-
-    if (type === 'employee') {
-      this.consentForm.get('acknowledgment.employeeSignature')?.setValue(signature);
-      this.consentForm.get('acknowledgment.employeeSignature')?.markAsTouched();
-      this.consentForm.get('acknowledgment.employeeSignature')?.updateValueAndValidity();
-    } else {
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.setValue(signature);
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.markAsTouched();
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.updateValueAndValidity();
-    }
-  }
-
-  public clearSignature(type: 'employee' | 'representative'): void {
-    const canvas = type === 'employee'
-      ? this.employeeSignatureCanvas.nativeElement
-      : this.representativeSignatureCanvas.nativeElement;
-
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      return;
-    }
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (type === 'employee') {
-      this.consentForm.get('acknowledgment.employeeSignature')?.setValue('');
-      this.consentForm.get('acknowledgment.employeeSignature')?.markAsTouched();
-      this.consentForm.get('acknowledgment.employeeSignature')?.updateValueAndValidity();
-    } else {
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.setValue('');
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.markAsTouched();
-      this.consentForm.get('acknowledgment.authorizedRepresentativeSignature')?.updateValueAndValidity();
-    }
-  }
-
   public onSubmit(): void {
-    if (this.consentForm.valid) {
-      const payload: LaptopAcquisitionConsentPayload = {
-        currentDate: this.currentDate,
-        ...this.consentForm.value
-      };
+    if (this.isSubmitting || this.isLoadingProfile) {
+      return;
+    }
 
-      console.log('Laptop Acquisition Consent Payload:', payload);
-      alert('Laptop Acquisition Consent form submitted successfully!');
-      this.router.navigate(['/']);
-    } else {
+    if (this.consentForm.invalid) {
       this.consentForm.markAllAsTouched();
       alert('Please fill out all required fields.');
+      return;
     }
+
+    const formValues = this.consentForm.getRawValue();
+
+    if (
+      !formValues.employee.name ||
+      !formValues.employee.department ||
+      !formValues.employee.jobTitle ||
+      !formValues.employee.employeeId
+    ) {
+      alert(
+        'Your employee information is incomplete. Please contact IT Support.'
+      );
+      return;
+    }
+
+    // Format the date as YYYY-MM-DD for Django
+    const today = new Date();
+
+    const formattedCurrentDate = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0')
+    ].join('-');
+
+    const payload: LaptopAcquisitionPayload = {
+      currentDate: formattedCurrentDate,
+
+      employee: {
+        name: formValues.employee.name,
+        department: formValues.employee.department,
+        jobTitle: formValues.employee.jobTitle,
+        employeeId: formValues.employee.employeeId
+      },
+
+      officialUse: {
+        laptopDetails: formValues.officialUse.laptopDetails,
+        brandModel: formValues.officialUse.brandModel,
+        serialNumber: formValues.officialUse.serialNumber,
+        accessoriesProvided: formValues.officialUse.accessoriesProvided,
+        dateIssued: formValues.officialUse.dateIssued
+      }
+    };
+
+    this.isSubmitting = true;
+
+    this.http.post<any>(this.apiUrl, payload).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+
+        console.log(
+          'OST Laptop Acquisition Submission:',
+          response
+        );
+
+        const message = response.email_accepted
+          ? 'OST Laptop Acquisition form submitted successfully. The approval request has been sent to IT Support.'
+          : 'OST Laptop Acquisition form submitted successfully, but the approval email could not be sent. IT Support will need to review the submission.';
+
+        alert(message);
+
+        this.router.navigate(['/']);
+      },
+
+      error: (error) => {
+        this.isSubmitting = false;
+
+        console.error(
+          'OST Laptop Acquisition submission failed:',
+          error
+        );
+
+        const errorMessage =
+          error.error?.detail ||
+          error.error?.message ||
+          error.error?.error ||
+          'Unable to submit the OST Laptop Acquisition form. Please try again.';
+
+        alert(errorMessage);
+      }
+    });
   }
 
-  public isFieldInvalid(groupName: string, fieldName: string): boolean {
+  public isFieldInvalid(
+    groupName: string,
+    fieldName: string
+  ): boolean {
     const field = this.consentForm.get(`${groupName}.${fieldName}`);
-    return field ? field.invalid && (field.dirty || field.touched) : false;
+
+    return field
+      ? field.invalid && (field.dirty || field.touched)
+      : false;
   }
 }

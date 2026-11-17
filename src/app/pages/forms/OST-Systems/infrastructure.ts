@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 export interface OSTInfrastructurePayload {
+  company: 'OST';
   currentDate: Date;
   documentNo: string;
   dateReceived: string;
@@ -384,6 +385,7 @@ export class ItInfrastructureReceiptFormComponent implements OnInit {
   public onSubmit(): void {
     if (this.receiptForm.valid) {
       const payload: OSTInfrastructurePayload = {
+        company: 'OST',
         currentDate: this.currentDate,
         ...this.receiptForm.value
       };

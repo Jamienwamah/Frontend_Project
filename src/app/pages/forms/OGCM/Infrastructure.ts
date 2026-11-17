@@ -14,6 +14,7 @@ import { EntraService } from '../../../core/services/entra.service';
 
 
 export interface OGCMInfrastructurePayload {
+  company: 'OGCM';
   currentDate: Date;
 
   employee: {
@@ -518,6 +519,7 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
     if (this.receiptForm.valid) {
 
       const payload: OGCMInfrastructurePayload = {
+        company: 'OGCM',
         currentDate: this.currentDate,
         ...this.receiptForm.getRawValue()
       };

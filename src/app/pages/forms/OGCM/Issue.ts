@@ -9,6 +9,7 @@ import { EntraService } from '../../../core/services/entra.service';
 
 
 export interface LaptopAcquisitionConsentPayload {
+  company: 'OGCM';
   currentDate: string;
 
   employee: {
@@ -388,6 +389,7 @@ export class OGCMLaptopAcquisitionConsentComponent implements OnInit {
     const formValues = this.consentForm.getRawValue();
 
     const payload: LaptopAcquisitionConsentPayload = {
+      company: 'OGCM',
       currentDate: this.currentDate.toISOString(),
 
       employee: {

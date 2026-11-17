@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { EntraService } from '../../../core/services/entra.service';
 
 export interface OgfsDeviceTroubleshootingPayload {
+  company: 'OGFS';
   currentDate: Date;
 
   employee: {
@@ -976,6 +977,7 @@ export class OGFSTroubleshooting implements OnInit {
        * name, department and jobTitle are disabled.
        */
       const payload: OgfsDeviceTroubleshootingPayload = {
+        company: 'OGFS',
 
         currentDate: this.currentDate,
 
@@ -992,7 +994,7 @@ export class OGFSTroubleshooting implements OnInit {
 
       this.http.post(
 
-        `${environment.apiBaseUrl}/api/v1/ogfs/troubleshoot/`,
+        `${environment.apiBaseUrl}/api/v1/troubleshoot/`,
         payload,
 
         {

@@ -1,4 +1,3 @@
-
 import { environment } from '../../../../environments/environment.development';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -9,6 +8,7 @@ import { EntraService } from '../../../core/services/entra.service';
 
 
 export interface LaptopAcquisitionConsentPayload {
+  company: 'OGFS';
   currentDate: string;
 
   employee: {
@@ -397,6 +397,7 @@ export class LaptopAcquisitionConsentComponent implements OnInit {
     ].join('-');
 
     const payload: LaptopAcquisitionConsentPayload = {
+      company: 'OGFS',
       currentDate: formattedCurrentDate,
 
       employee: {

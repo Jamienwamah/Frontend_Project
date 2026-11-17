@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 export interface OGFSInfrastructurePayload {
+  company: 'OGFS';
   currentDate: Date;
   documentNo: string;
   dateReceived: string;
@@ -384,6 +385,7 @@ export class OGFSInfrastructure implements OnInit {
   public onSubmit(): void {
     if (this.receiptForm.valid) {
       const payload: OGFSInfrastructurePayload = {
+        company: 'OGFS',
         currentDate: this.currentDate,
         ...this.receiptForm.value
       };

@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { EntraService } from '../../../core/services/entra.service';
 
 export interface LaptopAcquisitionPayload {
+  company: 'OST';
   currentDate: string;
 
   employee: {
@@ -453,6 +454,7 @@ export class OSTLaptopAcquisitionConsentComponent implements OnInit {
     ].join('-');
 
     const payload: LaptopAcquisitionPayload = {
+      company: 'OST',
       currentDate: formattedCurrentDate,
 
       employee: {

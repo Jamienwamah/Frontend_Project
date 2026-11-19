@@ -390,7 +390,7 @@ export class OGCMLaptopAcquisitionConsentComponent implements OnInit {
 
     const payload: LaptopAcquisitionConsentPayload = {
       company: 'OGCM',
-      currentDate: this.currentDate.toISOString(),
+     currentDate: this.currentDate.toISOString().split('T')[0],
 
       employee: {
         name: formValues.employee.name,

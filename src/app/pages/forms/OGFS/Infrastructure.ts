@@ -386,7 +386,7 @@ export class OGFSInfrastructure implements OnInit {
     if (this.receiptForm.valid) {
       const payload: OGFSInfrastructurePayload = {
         company: 'OGFS',
-        currentDate: this.currentDate,
+        currentDate: this.currentDate.toISOString().split('T')[0],
         ...this.receiptForm.value
       };
 

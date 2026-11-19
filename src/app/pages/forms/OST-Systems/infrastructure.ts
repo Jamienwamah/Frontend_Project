@@ -386,7 +386,7 @@ export class ItInfrastructureReceiptFormComponent implements OnInit {
     if (this.receiptForm.valid) {
       const payload: OSTInfrastructurePayload = {
         company: 'OST',
-        currentDate: this.currentDate,
+        currentDate: this.currentDate.toISOString().split('T')[0],
         ...this.receiptForm.value
       };
 

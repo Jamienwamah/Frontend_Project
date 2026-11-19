@@ -520,7 +520,7 @@ export class OgcmInfrastructureReceiptFormComponent implements OnInit {
 
       const payload: OGCMInfrastructurePayload = {
         company: 'OGCM',
-        currentDate: this.currentDate,
+        currentDate: this.currentDate.toISOString().split('T')[0],
         ...this.receiptForm.getRawValue()
       };
 

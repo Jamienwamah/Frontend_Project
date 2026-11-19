@@ -988,7 +988,7 @@ export class OGFSReplacement implements OnInit {
 
       this.http.post(
 
-       `${environment.apiBaseUrl}/api/v1/device-replacement/`,
+       `${environment.apiBaseUrl}/api/v1/replacement/`,
         payload,
 
         {
